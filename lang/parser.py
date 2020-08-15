@@ -159,7 +159,7 @@ class Parser:
     def operand(self) -> AST:
         """
         Parses an operand
-            operand : int | (expression) | (ADD|SUB) operand
+            operand : int | real | (expression) | (add|sub|floor) operand
         """
 
         operand_token = self.curr

@@ -48,7 +48,7 @@ class Lexer:
         self.curr = None if not input else input[0]
 
 
-    def next(self):
+    def next(self) -> str:
         """
         Returns next character in stream without incrementing
         """
@@ -61,7 +61,7 @@ class Lexer:
         return self.input[i]
 
 
-    def increment(self):
+    def increment(self) -> None:
         """
         Increments pointer in token, updating current char.
         """
@@ -75,7 +75,7 @@ class Lexer:
             self.curr = self.input[self.index]
 
 
-    def trim(self):
+    def trim(self) -> None:
         """
         Trims whitespace past the current index.
         """
@@ -84,7 +84,7 @@ class Lexer:
             self.increment()
 
 
-    def number_token(self):
+    def number_token(self) -> Token:
         """
         Parses a multi character integer / float, returning a token
         """
@@ -109,7 +109,7 @@ class Lexer:
 
 
 
-    def identifier_token(self):
+    def identifier_token(self) -> Token:
         """
         Parses a variable identifier
         """
@@ -132,7 +132,7 @@ class Lexer:
         return Token(tkns.ID, id)
 
 
-    def token(self):
+    def token(self) -> Token:
         """
         Returns next token in stream
         """

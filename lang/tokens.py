@@ -1,3 +1,13 @@
+# Non Terminals
+INT = "int"
+I_CON = "icon"
+
+REAL = "real"
+R_CON = "rcon"
+
+ID = "id"
+EOF = "eof"
+
 # Terminals
 ADD = "add"
 SUB = "sub"
@@ -32,11 +42,3 @@ switch = {
     ";"  : SEMI,
     "=>" : RETURN
 }
-
-# Non Terminals
-INT = "int"
-REAL = "real"
-
-ID = "id"
-
-EOF = "eof"
