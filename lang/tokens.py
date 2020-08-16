@@ -25,7 +25,9 @@ RETURN = "return"
 END = "end"
 
 ASSIGN = "assign"
-SEMI = "semi"
+SEP = "sep"
+
+MAIN = "main"
 
 switch = {
     "+"  : ADD,
@@ -39,6 +41,6 @@ switch = {
     "{"  : START,
     "}"  : END,
     "="  : ASSIGN,
-    ";"  : SEMI,
+    ";"  : SEP,
     "=>" : RETURN
 }

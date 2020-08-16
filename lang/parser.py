@@ -143,17 +143,16 @@ class Parser:
         raise TypeError("Invalid syntax \"" + str(syntax) + "\"")
 
 
-    def consume(self, type: str) -> bool:
+    def consume(self, type: str) -> None:
         """
         Consumes a token of the specified type, raising an error if the current
         token in the stream is not that type.
         """
 
         if self.curr.type != type:
-            return False
+            self.syntax_error(self.curr.value)
 
         self.curr = self.lexer.token()
-        return True
 
 
     def operand(self) -> AST:
@@ -183,7 +182,7 @@ class Parser:
             self.consume(tkns.R_PAREN)
 
         else:
-            self.syntax_error(operand_token.type)
+            self.syntax_error(operand_token.value)
 
         return node
 
@@ -191,7 +190,7 @@ class Parser:
     def term(self) -> AST:
         """
         Parses a term
-            term : operand ((MUL|DIV) operand)*
+            term : operand ((mul|div) operand)*
         """
 
         node = self.operand()
@@ -210,7 +209,7 @@ class Parser:
     def expression(self) -> AST:
         """
         Parses an expression
-            term : term ((ADD|SUB) term)*
+            term : term ((add|sub) term)*
         """
 
         node = self.term()
@@ -250,48 +249,37 @@ class Parser:
     def assignment_statement(self) -> AST:
         """
         Parses an assignment statement
-            statement : variable ASSIGN expression
+            statement : variable assign expression
         """
 
         var = self.variable()
         token = self.curr
 
         self.consume(tkns.ASSIGN)
+        stmt = AssignmentStatement(var, token, self.expression())
 
-        return AssignmentStatement(var, token, self.expression())
+        return stmt
 
 
     def statement(self) -> AST:
         """
         Parses a statement
-            statement : compound_statement | assignment_statement | empty
+            statement : compound_statement | empty | assignment_statement sep
         """
 
         token = self.curr
 
-        if token.type == tkns.START:
-            return self.compound_statement()
-
         if token.type == tkns.ID:
-            return self.assignment_statement()
+            stmt = self.assignment_statement()
+            self.consume(tkns.SEP)
 
-        return self.empty()
+        elif token.type == tkns.START:
+            stmt = self.compound_statement()
 
+        else:
+            stmt = self.empty()
 
-    def statements(self) -> list:
-        """
-        Parses a statements block
-            statements : statement | statement SEMI statements
-        """
-
-        statements = [self.statement()]
-
-        while self.curr.type == tkns.SEMI:
-
-            self.consume(tkns.SEMI)
-            statements.append(self.statement())
-
-        return statements
+        return stmt
 
 
     def compound_statement(self) -> AST:
@@ -301,16 +289,20 @@ class Parser:
         """
 
         self.consume(tkns.START)
-        compound = CompoundStatement(self.statements())
+
+        children = []
+        while self.curr.type != tkns.END:
+            children.append(self.statement())
+
         self.consume(tkns.END)
 
-        return compound
+        return CompoundStatement(children)
 
 
     def program(self) -> AST:
         """
         Parses a program
-            program : compound_statement EOF
+            program : compound_statement eof
         """
 
         ast = self.compound_statement()

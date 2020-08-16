@@ -72,12 +72,12 @@ Represents an empty statement
 Represents an assignment statement, where a variable is assigned the result of san expression
 
 ### statement
-##### compound statement | assignment statement | empty
+##### compound statement | assignment statement separator | empty
 
 Represents a general statement of code
 
 ### statements
-##### statement | statement separator statements
+##### statement | [ statement ]+
 
 Represents one or more statements
 

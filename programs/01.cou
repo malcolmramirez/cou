@@ -5,8 +5,8 @@
         a = number;
         b = 10 * a + 10 * number ~/ 4;
         c = a - - b;
-        a = ~(c - b - 0.5)
-    };
+        _a_cool_tho = ~(c - b - 0.5);
+    }
 
     x = 11;
 }
