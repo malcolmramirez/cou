@@ -1,9 +1,6 @@
 # Non Terminals
 INT = "int"
-I_CON = "icon"
-
 REAL = "real"
-R_CON = "rcon"
 
 ID = "id"
 EOF = "eof"
@@ -26,9 +23,14 @@ END = "end"
 
 ASSIGN = "assign"
 SEP = "sep"
+COLON = "colon"
 
-EXEC = "exec"
-GLBL = "glbl"
+COMMENT = "comment"
+
+KEYWORD = "keyword"
+TYPE = "type"
+
+DECL = "decl"
 SAY = "say"
 
 switch = {
@@ -44,5 +46,16 @@ switch = {
     "}"  : END,
     "="  : ASSIGN,
     ";"  : SEP,
+    ":"  : COLON,
+    "#"  : COMMENT,
     "=>" : RETURN
+}
+
+types = {
+    "int"  : INT,
+    "real" : REAL
+}
+
+keywords = {
+    "say" : SAY
 }

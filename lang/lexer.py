@@ -57,7 +57,6 @@ class Lexer:
 
         return self.input[i]
 
-
     def increment(self) -> None:
         """
         Increments pointer in token, updating current char.
@@ -71,13 +70,20 @@ class Lexer:
         else:
             self.curr = self.input[self.index]
 
-    def trim(self) -> None:
+    def skip(self) -> None:
         """
-        Trims whitespace past the current index.
+        Skips whitespace and comments
         """
 
-        while self.curr and self.curr.isspace():
-            self.increment()
+        while self.curr and \
+                (self.curr == "#" or self.curr.isspace()):
+
+            while self.curr and self.curr.isspace():
+                self.increment()
+
+            if self.curr == "#":
+                while self.curr and self.curr != "\n":
+                    self.increment()
 
     def number_token(self) -> Token:
         """
@@ -102,9 +108,9 @@ class Lexer:
 
         return Token(tkns.REAL, float(number))
 
-    def identifier_token(self) -> Token:
+    def id_token(self) -> Token:
         """
-        Parses a variable identifier
+        Parses a variable identifier, type, or keyword
         """
 
         def valid(char: str) -> bool:
@@ -121,24 +127,30 @@ class Lexer:
             id += self.curr
             self.increment()
 
+        if id in tkns.types:
+            return Token(tkns.TYPE, id)
+
+        elif id in tkns.keywords:
+            return Token(id, id)
+
         return Token(tkns.ID, id)
 
     def token(self) -> Token:
         """
         Returns next token in stream
         """
-
-        self.trim()
+        
+        self.skip()
 
         char = self.curr
 
         if not char:
             return Token(tkns.EOF, None)
 
-        if char == '.' or char.isdigit():
+        elif char == '.' or char.isdigit():
             return self.number_token()
 
-        if char == "~" and self.next() == "/":
+        elif char == "~" and self.next() == "/":
             # Case of integer division
             char += "/"
             self.increment()
@@ -147,7 +159,7 @@ class Lexer:
 
         if not type:
             if char.isalpha() or char == "_":
-                return self.identifier_token()
+                return self.id_token()
 
             raise TypeError("Invalid syntax \"" + char + "\"")
 

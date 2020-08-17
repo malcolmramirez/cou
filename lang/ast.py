@@ -20,10 +20,8 @@ class Number(AST):
     def __init__(self, token: Token):
         self.token = token
 
-
     def value(self) -> int:
         return self.token.value
-
 
     def name(self) -> str:
         return "number"
@@ -38,10 +36,8 @@ class UnaryOperator(AST):
         self.token = token
         self.child = child
 
-
     def type(self) -> str:
         return self.token.type
-
 
     def name(self) -> str:
         return "unary_operator"
@@ -57,10 +53,8 @@ class BinaryOperator(AST):
         self.token = token
         self.right = right
 
-
     def type(self) -> str:
         return self.token.type
-
 
     def name(self) -> str:
         return "binary_operator"
@@ -74,10 +68,8 @@ class Variable(AST):
     def __init__(self, token: Token):
         self.token = token
 
-
     def sym(self) -> str:
         return self.token.value
-
 
     def name(self) -> str:
         return "variable"
@@ -90,7 +82,6 @@ class CompoundStatement(AST):
 
     def __init__(self, children: list = None):
         self.children = [] if not children else children
-
 
     def name(self) -> str:
         return "compound_statement"
@@ -106,7 +97,6 @@ class AssignmentStatement(AST):
         self.token = token
         self.right = right
 
-
     def name(self) -> str:
         return "assignment_statement"
 
@@ -118,3 +108,16 @@ class Empty(AST):
 
     def name(self) -> str:
         return "empty"
+
+
+class VariableDeclaration(AST):
+    """
+    Represents a variable declaration
+    """
+
+    def __init__(self, variable: AST, type: Token):
+        self.variable = variable
+        self.type = type
+
+    def name(self) -> str:
+        return "variable_declaration"

@@ -110,6 +110,13 @@ class Parser:
 
         return Variable(token)
 
+    def variable_declaration(self) -> AST:
+        """
+        Parses a variable delaration
+        """
+
+        pass
+
     def empty(self) -> AST:
         """
         Parses an empty expression:
