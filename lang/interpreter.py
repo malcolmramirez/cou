@@ -20,10 +20,9 @@ class Visitor(object):
         Calls appropriate visit method for a node type
         """
 
-        return getattr(self, node.name(), self.error)(node)
+        return getattr(self, node.name(), self.visit_error)(node)
 
-
-    def error(self, node: AST):
+    def visit_error(self, node: AST):
         """
         Raises error if no visit method for a node type
         """
@@ -42,8 +41,7 @@ class Interpreter(Visitor):
         """
 
         self.parser = Parser(Lexer(text))
-        self.sym_tab = defaultdict()
-
+        self.global_scope = defaultdict()
 
     def syntax_error(self, syntax: object):
         """
@@ -52,14 +50,12 @@ class Interpreter(Visitor):
 
         raise TypeError("Invalid syntax \"" + str(syntax) + "\"")
 
-
     def number(self, node: AST) -> int:
         """
         Visits a number node (just needs to return the value)
         """
 
         return node.value()
-
 
     def unary_operator(self, node: AST) -> int:
         """
@@ -78,7 +74,6 @@ class Interpreter(Visitor):
             return floor(self.visit(node.child))
 
         self.syntax_error(type)
-
 
     def binary_operator(self, node: AST) -> int:
         """
@@ -105,7 +100,6 @@ class Interpreter(Visitor):
 
         self.syntax_error(type)
 
-
     def variable(self, node: AST) -> AST:
         """
         Interprets a variable
@@ -113,11 +107,10 @@ class Interpreter(Visitor):
 
         sym = node.sym()
 
-        if sym not in self.sym_tab:
+        if sym not in self.global_scope:
             raise NameError("Variable \"" + sym + "\" referenced before assignment")
 
-        return self.sym_tab[sym]
-
+        return self.global_scope[sym]
 
     def assignment_statement(self, node: AST) -> None:
         """
@@ -125,8 +118,7 @@ class Interpreter(Visitor):
         """
 
         var = node.left.sym()
-        self.sym_tab[var] = self.visit(node.right)
-
+        self.global_scope[var] = self.visit(node.right)
 
     def compound_statement(self, node: AST) -> None:
         """
@@ -136,10 +128,12 @@ class Interpreter(Visitor):
         for child in node.children:
             self.visit(child)
 
-
     def empty(self, node: AST) -> None:
-        return
+        """
+        Interprets an empty expression
+        """
 
+        return
 
     def interpret(self) -> str:
         """
@@ -147,9 +141,8 @@ class Interpreter(Visitor):
         """
 
         self.visit(self.parser.program())
-
-        return str(self.sym_tab)
-
+        return str(self.global_scope)
+        
 
 def main():
 
@@ -172,7 +165,6 @@ def main():
         except KeyboardInterrupt:
             print("")
             return
-
 
 if __name__ == "__main__":
     main()

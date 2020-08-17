@@ -15,14 +15,12 @@ class Token:
         self.type = type
         self.value = value
 
-
     def __str__(self) -> str:
         """
         Returns string representation of Token
         """
 
         return "Token({}, {})".format(self.type, self.value)
-
 
     def __repr__(self) -> str:
         """
@@ -46,7 +44,6 @@ class Lexer:
         self.input = input
         self.index = 0
         self.curr = None if not input else input[0]
-
 
     def next(self) -> str:
         """
@@ -74,7 +71,6 @@ class Lexer:
         else:
             self.curr = self.input[self.index]
 
-
     def trim(self) -> None:
         """
         Trims whitespace past the current index.
@@ -82,7 +78,6 @@ class Lexer:
 
         while self.curr and self.curr.isspace():
             self.increment()
-
 
     def number_token(self) -> Token:
         """
@@ -107,8 +102,6 @@ class Lexer:
 
         return Token(tkns.REAL, float(number))
 
-
-
     def identifier_token(self) -> Token:
         """
         Parses a variable identifier
@@ -122,7 +115,6 @@ class Lexer:
             return self.curr and \
                 (self.curr.isalpha() or self.curr == "_")
 
-
         id = ''
 
         while valid(self.curr):
@@ -130,7 +122,6 @@ class Lexer:
             self.increment()
 
         return Token(tkns.ID, id)
-
 
     def token(self) -> Token:
         """

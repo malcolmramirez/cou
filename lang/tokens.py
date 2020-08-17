@@ -27,7 +27,9 @@ END = "end"
 ASSIGN = "assign"
 SEP = "sep"
 
-MAIN = "main"
+EXEC = "exec"
+GLBL = "glbl"
+SAY = "say"
 
 switch = {
     "+"  : ADD,
