@@ -4,8 +4,6 @@ from lang.lexer import Token, Lexer
 from lang.parser import Parser
 from lang.ast import AST
 
-from collections import defaultdict
-
 # Interpreter
 
 class Visitor(object):
@@ -40,7 +38,7 @@ class Interpreter(Visitor):
         Initializes interpreter with a parser, used to eval. expressions
         """
 
-        self.global_scope = defaultdict()
+        self.global_scope = {}
 
     def syntax_error(self, syntax: object):
         """
@@ -104,13 +102,24 @@ class Interpreter(Visitor):
         Interprets a variable
         """
 
-        id = node.id()
+        var = node.id()
+        
+        if var not in self.global_scope:
+            raise NameError("Variable \"{}\" referenced before declaration".format(var))
 
-        if id not in self.global_scope:
-            raise NameError("Variable \"" + id +
-                            "\" referenced before assignment")
+        return self.global_scope[var]
 
-        return self.global_scope[id]
+    def variable_declaration(self, node: AST) -> None:
+        """
+        Interprets a variable declaration
+        """
+
+        var = node.id()
+
+        if var in self.global_scope:
+            raise NameError("Variable \"{}\" declared more than once".format(var))
+
+        self.global_scope[var] = None
 
     def say(self, node: AST) -> None:
         """

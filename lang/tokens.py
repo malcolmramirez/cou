@@ -1,9 +1,11 @@
 # Non Terminals
-INT = "int"
-REAL = "real"
+INT_CONST = "iconst"
+REAL_CONST = "rconst"
 
 ID = "id"
 EOF = "eof"
+
+TYPE = "type"
 
 # Terminals
 ADD = "add"
@@ -27,10 +29,16 @@ COLON = "colon"
 
 COMMENT = "comment"
 
-KEYWORD = "keyword"
-TYPE = "type"
-
+# Keywords
 SAY = "say"
+
+# Types
+T_INT = "int"
+T_REAL = "real"
+
+# Currently unadded types ->
+T_STR = "str"
+T_BOOL = "bool"
 
 switch = {
     "+"  : ADD,
@@ -51,10 +59,9 @@ switch = {
 }
 
 types = {
-    "int"  : INT,
-    "real" : REAL
+    T_INT, T_REAL, T_STR, T_BOOL
 }
 
 keywords = {
-    "say" : SAY
+    SAY
 }

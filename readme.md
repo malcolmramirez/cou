@@ -6,58 +6,58 @@ Cou is a simple programming language
 
 Cou currently has the following language constructs:
 
-### integer
-#### [0-9]+
-
-Represents an integer
-
-### real
-#### [0-9]* [\.] [0-9]+
-
-Represents a real number
-
 ### number
-#### integer | real
+#### [0-9]+ | [0-9]* [\.] [0-9]+
 
 Represents an integer or real number
 
 ### id
-#### ( [a-z] | [A-Z] | _ )+
+#### [[a-z]|[A-Z]| _ ]+
 
 Represents an identifier used for variables/function declarations
 
 ### begin
 #### \{
 
-Represents the beginning of a grouping of code
+Represents the beginning of a function
 
 ### end
 #### \}
 
-Represents the end of a grouping of code
+Represents the end of a function
 
 ### separator
 #### ;
 
 Represents a seprator of lines of code
 
+### type
+#### int | real
+
+Represents a valid type in cou (either an int or real)
+
 ### variable
 #### id
 
 Represents a variable with an identifier
 
+### variable_declaration
+#### variable [:] type
+
+Represents a variable declaration
+
 ### operand
-#### int | real | (expression) | ( + | - | ~ ) operand
+#### number | (expression) | [+|-|~] operand | variable
 
 Represents an object that can be operated on. (~ is a unary operator for the floor function)
 
 ### term
-#### operand ( \* | / | ~/ ) operand)*
+#### operand [\*|/|~/] operand)*
 
 Represents a term, ie, a grouping of multiplication operations done on operands (~/ is integer division)
 
 ### expression
-#### term (( + | - ) term)*
+#### term [[+|-] term]*
 
 Represents an expression, ie, a grouping of addition operations done on terms
 
@@ -67,7 +67,7 @@ Represents an expression, ie, a grouping of addition operations done on terms
 Represents an empty statement
 
 ### assignment statement
-#### variable [=] expression
+#### [variable | variable_declaration] [=] expression
 
 Represents an assignment statement, where a variable is assigned the result of san expression
 

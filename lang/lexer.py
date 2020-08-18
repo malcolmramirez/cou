@@ -106,7 +106,7 @@ class Lexer:
             self.increment()
 
         if self.curr != ".":
-            return Token(tkns.INT, int(number))
+            return Token(tkns.INT_CONST, int(number))
 
         number += self.curr
         self.increment()
@@ -115,7 +115,7 @@ class Lexer:
             number += self.curr
             self.increment()
 
-        return Token(tkns.REAL, float(number))
+        return Token(tkns.REAL_CONST, float(number))
 
     def id_token(self) -> Token:
         """

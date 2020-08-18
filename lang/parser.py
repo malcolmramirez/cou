@@ -48,7 +48,7 @@ class Parser:
         operand_token = self.curr
         node = None
 
-        if operand_token.type in (tkns.INT, tkns.REAL):
+        if operand_token.type in (tkns.INT_CONST, tkns.REAL_CONST):
             self.consume(operand_token.type)
             node = Number(operand_token)
 
@@ -124,13 +124,6 @@ class Parser:
 
         return Say(node)
 
-    def variable_declaration(self) -> AST:
-        """
-        Parses a variable delaration
-        """
-
-        pass
-
     def empty(self) -> AST:
         """
         Parses an empty expression:
@@ -146,12 +139,22 @@ class Parser:
                             | variable_declaration assign expression
         """
 
-        var = self.variable()
+        to_assign = self.variable()
         token = self.curr
+
+        if token.type == tkns.COLON:
+
+            self.consume(tkns.COLON)
+
+            type = self.curr
+            print(type)
+            self.consume(tkns.TYPE)
+
+            to_assign = VariableDeclaration(to_assign, type)
 
         self.consume(tkns.ASSIGN)
 
-        return AssignmentStatement(var, token, self.expression())
+        return AssignmentStatement(to_assign, token, self.expression())
 
     def statement(self) -> AST:
         """
@@ -160,6 +163,7 @@ class Parser:
                             | empty
                             | assignment_statement sep
                             | say sep
+                            | variable_declaration sep
         """
 
         token = self.curr

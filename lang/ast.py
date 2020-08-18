@@ -106,6 +106,9 @@ class VariableDeclaration(AST):
         self.variable = variable
         self.type = type
 
+    def id(self) -> str:
+        return self.variable.id()
+
     def name(self) -> str:
         return "variable_declaration"
 

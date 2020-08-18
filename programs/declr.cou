@@ -1,0 +1,16 @@
+
+number: int = 6;
+
+x: int = 5;
+say x;
+
+y: real = 2.0;
+
+x = number;
+y = 10 * y + 100 * x / 6;
+
+x = 5;
+x_y: real = x - - y;
+
+say y; # this should be 120.0
+say x_y; # this should be 125.0
