@@ -69,7 +69,7 @@ class Interpreter(Visitor):
         if type == tkns.SUB:
             return -self.visit(node.child)
 
-        if type == tkns.APPROX:
+        if type == tkns.ROUND:
             return round(self.visit(node.child))
 
         self.syntax_error(type)

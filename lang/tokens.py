@@ -8,7 +8,7 @@ EOF = "eof"
 # Terminals
 ADD = "add"
 SUB = "sub"
-APPROX = "approx"
+ROUND = "round"
 
 MUL = "mul"
 DIV = "div"
