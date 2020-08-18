@@ -1,5 +1,4 @@
-
-from lexer import Token
+from lang.lexer import Token
 
 # Abstract syntax tree
 
@@ -68,7 +67,7 @@ class Variable(AST):
     def __init__(self, token: Token):
         self.token = token
 
-    def sym(self) -> str:
+    def id(self) -> str:
         return self.token.value
 
     def name(self) -> str:
@@ -121,3 +120,15 @@ class VariableDeclaration(AST):
 
     def name(self) -> str:
         return "variable_declaration"
+
+
+class Say(AST):
+    """
+    Represents something that is printed
+    """
+
+    def __init__(self, to_say: AST):
+        self.to_say = to_say
+
+    def name(self) -> str:
+        return "say"

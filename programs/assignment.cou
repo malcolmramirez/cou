@@ -1,4 +1,4 @@
-
+# Header comment
 {
     # Here is a comment that I am testing
     # This is the second line of that comment
@@ -8,15 +8,23 @@
         number = 5;
 
         a = number;
-        b = 10 * a + 10 * number ~/ 4; # Here is another
-        c = a - - b;
-
+        # A comment to test commenting
+        b = 10 * a + 10 * number / 4; # Here is another
+        c = a - - b; # cool comments
+        # Test1
+                    # Test2
         _a_cool_tho = c - b - 0.5;
     }
 
     # Here is the last comment i am testing
 
     x = 11;
+    say1 = c - 18 - b + 0.25;
+
+    say say1;
+    say c - 18 - b + 0.25;
+
+    say x * 10 - ~say1;
 }
 
 # Just kidding

@@ -8,7 +8,7 @@ EOF = "eof"
 # Terminals
 ADD = "add"
 SUB = "sub"
-FLOOR = "floor"
+APPROX = "approx"
 
 MUL = "mul"
 DIV = "div"
@@ -30,7 +30,6 @@ COMMENT = "comment"
 KEYWORD = "keyword"
 TYPE = "type"
 
-DECL = "decl"
 SAY = "say"
 
 switch = {
@@ -39,7 +38,7 @@ switch = {
     "*"  : MUL,
     "/"  : DIV,
     "~/" : I_DIV,
-    "~"  : FLOOR,
+    "~"  : ROUND,
     "("  : L_PAREN,
     ")"  : R_PAREN,
     "{"  : START,

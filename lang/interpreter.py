@@ -1,10 +1,10 @@
-import tokens as tkns
+import lang.tokens as tkns
+
+from lang.lexer import Token, Lexer
+from lang.parser import Parser
+from lang.ast import AST
 
 from collections import defaultdict
-from math import floor
-
-from lexer import Token, Lexer
-from parser import AST, Parser
 
 # Interpreter
 
@@ -35,12 +35,11 @@ class Interpreter(Visitor):
     Evaluates expressions from the parser
     """
 
-    def __init__(self, text: str):
+    def __init__(self, text: str = None):
         """
         Initializes interpreter with a parser, used to eval. expressions
         """
 
-        self.parser = Parser(Lexer(text))
         self.global_scope = defaultdict()
 
     def syntax_error(self, syntax: object):
@@ -70,8 +69,8 @@ class Interpreter(Visitor):
         if type == tkns.SUB:
             return -self.visit(node.child)
 
-        if type == tkns.FLOOR:
-            return floor(self.visit(node.child))
+        if type == tkns.APPROX:
+            return round(self.visit(node.child))
 
         self.syntax_error(type)
 
@@ -105,19 +104,29 @@ class Interpreter(Visitor):
         Interprets a variable
         """
 
-        sym = node.sym()
+        id = node.id()
 
-        if sym not in self.global_scope:
-            raise NameError("Variable \"" + sym + "\" referenced before assignment")
+        if id not in self.global_scope:
+            raise NameError("Variable \"" + id +
+                            "\" referenced before assignment")
 
-        return self.global_scope[sym]
+        return self.global_scope[id]
+
+    def say(self, node: AST) -> None:
+        """
+        Interprets a say statement
+        """
+
+        visited = self.visit(node.to_say)
+
+        print(str(visited))
 
     def assignment_statement(self, node: AST) -> None:
         """
         Interprets an assignment statement
         """
 
-        var = node.left.sym()
+        var = node.left.id()
         self.global_scope[var] = self.visit(node.right)
 
     def compound_statement(self, node: AST) -> None:
@@ -135,36 +144,10 @@ class Interpreter(Visitor):
 
         return
 
-    def interpret(self) -> str:
+    def interpret(self, text: str) -> str:
         """
-        Interprets an expression.
+        Interprets a line of text.
         """
 
-        self.visit(self.parser.program())
-        return str(self.global_scope)
-        
-
-def main():
-
-    while True:
-
-        try:
-            file_name = input("> ")
-            text = ''
-
-            with open(file_name, 'r') as file:
-                for line in file:
-                    text += line
-
-            intr = Interpreter(text)
-            print(intr.interpret())
-
-        except TypeError as e:
-            print(e)
-
-        except KeyboardInterrupt:
-            print("")
-            return
-
-if __name__ == "__main__":
-    main()
+        parser = Parser(Lexer(text))
+        self.visit(parser.program())

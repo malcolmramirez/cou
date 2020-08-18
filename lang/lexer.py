@@ -1,6 +1,5 @@
-import tokens as tkns
+import lang.tokens as tkns
 
-# Lexer
 
 class Token:
     """
@@ -57,6 +56,15 @@ class Lexer:
 
         return self.input[i]
 
+    def feed(self, input: str) -> None:
+        """
+        Feeds a new line of input into the lexer
+        """
+
+        self.input = input
+        self.index = 0
+        self.curr = None if not input else input[0]
+
     def increment(self) -> None:
         """
         Increments pointer in token, updating current char.
@@ -82,6 +90,7 @@ class Lexer:
                 self.increment()
 
             if self.curr == "#":
+                # Single line comments
                 while self.curr and self.curr != "\n":
                     self.increment()
 
@@ -119,7 +128,7 @@ class Lexer:
             """
 
             return self.curr and \
-                (self.curr.isalpha() or self.curr == "_")
+                (self.curr.isalnum() or self.curr == "_")
 
         id = ''
 
@@ -139,7 +148,7 @@ class Lexer:
         """
         Returns next token in stream
         """
-        
+
         self.skip()
 
         char = self.curr
@@ -158,6 +167,7 @@ class Lexer:
         type = tkns.switch.get(char)
 
         if not type:
+            # If we haven't got a type returned, this is an identifier
             if char.isalpha() or char == "_":
                 return self.id_token()
 
