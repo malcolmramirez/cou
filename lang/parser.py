@@ -39,10 +39,7 @@ class Parser:
     def operand(self) -> AST:
         """
         Parses an operand
-            operand : int | real
-                          | (expression)
-                          | (add|sub|floor) operand
-                          | variable
+            operand : number | (expression) | (add|sub|round) operand | variable
         """
 
         operand_token = self.curr
@@ -147,7 +144,6 @@ class Parser:
             self.consume(tkns.COLON)
 
             type = self.curr
-            print(type)
             self.consume(tkns.TYPE)
 
             to_assign = VariableDeclaration(to_assign, type)
@@ -159,11 +155,7 @@ class Parser:
     def statement(self) -> AST:
         """
         Parses a statement
-            statement : compound_statement
-                            | empty
-                            | assignment_statement sep
-                            | say sep
-                            | variable_declaration sep
+            statement : empty | assignment_statement sep | say sep
         """
 
         token = self.curr
