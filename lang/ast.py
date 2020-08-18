@@ -74,18 +74,6 @@ class Variable(AST):
         return "variable"
 
 
-class CompoundStatement(AST):
-    """
-    Represents a compound statement in the AST
-    """
-
-    def __init__(self, children: list = None):
-        self.children = [] if not children else children
-
-    def name(self) -> str:
-        return "compound_statement"
-
-
 class AssignmentStatement(AST):
     """
     Represents an assignment statement in the AST
@@ -132,3 +120,15 @@ class Say(AST):
 
     def name(self) -> str:
         return "say"
+
+
+class Program(AST):
+    """
+    Represents a compound statement in the AST
+    """
+
+    def __init__(self, statements: list = None):
+        self.statements = [] if not statements else statements
+
+    def name(self) -> str:
+        return "program"

@@ -72,21 +72,18 @@ Represents an empty statement
 Represents an assignment statement, where a variable is assigned the result of san expression
 
 ### statement
-#### compound statement | assignment statement separator | empty separator
+#### assignment_statement separator | empty separator
 
 Represents a general statement of code
 
-### statements
-#### statement | [ statement ]+
-
-Represents one or more statements
-
-### compound statement
-#### begin statements end
-
-Represents many statements surrounded by begin and end blocks, ie, a block of code
-
 ### program
-#### compound statement eof
+#### statement* eof
 
-Represents a program, ie, a block of code with the end of file terminating it
+Represents a program, ie, a block of statements with the end of file terminating it
+
+## Built in functions
+
+### say
+#### Usage : say arg;
+
+Prints the string representation of an argument (parentheses optional)

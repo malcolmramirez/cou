@@ -129,12 +129,12 @@ class Interpreter(Visitor):
         var = node.left.id()
         self.global_scope[var] = self.visit(node.right)
 
-    def compound_statement(self, node: AST) -> None:
+    def program(self, node: AST) -> None:
         """
-        Interprets an assignment statement
+        Interprets a program
         """
 
-        for child in node.children:
+        for child in node.statements:
             self.visit(child)
 
     def empty(self, node: AST) -> None:
@@ -150,4 +150,4 @@ class Interpreter(Visitor):
         """
 
         parser = Parser(Lexer(text))
-        self.visit(parser.program())
+        self.visit(parser.parse())

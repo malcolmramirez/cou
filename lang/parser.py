@@ -143,6 +143,7 @@ class Parser:
         """
         Parses an assignment statement
             statement : variable assign expression
+                            | variable_declaration assign expression
         """
 
         var = self.variable()
@@ -155,13 +156,13 @@ class Parser:
     def statement(self) -> AST:
         """
         Parses a statement
-            statement : compound_statement | empty | assignment_statement sep | say sep
+            statement : compound_statement
+                            | empty
+                            | assignment_statement sep
+                            | say sep
         """
 
         token = self.curr
-
-        if token.type == tkns.START:
-            return self.compound_statement()
 
         if token.type == tkns.ID:
             stmt = self.assignment_statement()
@@ -176,32 +177,19 @@ class Parser:
 
         return stmt
 
-    def compound_statement(self) -> AST:
-        """
-        Parses a compound statement
-            compound_statement : beg statements end
-        """
-
-        self.consume(tkns.START)
-
-        children = []
-        while self.curr.type != tkns.END:
-            children.append(self.statement())
-
-        self.consume(tkns.END)
-
-        return CompoundStatement(children)
-
     def program(self) -> AST:
         """
         Parses a program
-            program : compound_statement eof
+            program : statement* eof
         """
 
-        ast = self.compound_statement()
+        statements = []
+        while self.curr.type != tkns.EOF:
+            statements.append(self.statement())
+
         self.consume(tkns.EOF)
 
-        return ast
+        return Program(statements)
 
     def parse(self) -> AST:
         """
