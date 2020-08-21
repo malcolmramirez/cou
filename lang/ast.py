@@ -2,6 +2,7 @@ from lang.lexer import Token
 
 # Abstract syntax tree
 
+
 class AST(object):
     """
     Superclass for AST nodes
@@ -40,6 +41,7 @@ class Boolean(AST):
     def name(self) -> str:
         return "boolean"
 
+
 class String(AST):
     """
     Represents a string in the AST
@@ -53,7 +55,7 @@ class String(AST):
 
     def name(self) -> str:
         return "string"
-        
+
 
 class UnaryOperator(AST):
     """

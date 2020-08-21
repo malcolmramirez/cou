@@ -1,5 +1,5 @@
 import lang.tokens as tkns
-
+import lang.typeutils as typeutils
 
 class Token:
     """
@@ -162,8 +162,7 @@ class Lexer:
         self.increment()
 
         # Decode escape characters
-        s = bytes(s, "utf-8").decode("unicode_escape")
-        return Token(tkns.STR_CONST, s)
+        return Token(tkns.STR_CONST, typeutils.decode_escapes(s))
 
 
     def token(self) -> Token:

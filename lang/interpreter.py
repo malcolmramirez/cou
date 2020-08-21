@@ -220,7 +220,7 @@ class Interpreter(Visitor):
         for child in node.statements:
             self.visit(child)
 
-    def interpret(self, text: str) -> str:
+    def interpret(self, text: str) -> None:
         """
         Interprets a line of text.
         """
