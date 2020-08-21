@@ -171,7 +171,7 @@ class Lexer:
             if char.isalpha() or char == "_":
                 return self.id_token()
 
-            raise TypeError("Invalid syntax \"" + char + "\"")
+            raise SyntaxError("Unexpected character \"" + char + "\"")
 
         token = Token(type, char)
         self.increment()

@@ -2,6 +2,9 @@
 INT_CONST = "iconst"
 REAL_CONST = "rconst"
 
+BOOL_T = "true"
+BOOL_F = "false"
+
 ID = "id"
 EOF = "eof"
 
@@ -35,10 +38,11 @@ SAY = "say"
 # Types
 T_INT = "int"
 T_REAL = "real"
-
-# Currently unadded types ->
-T_STR = "str"
 T_BOOL = "bool"
+
+# Currently unadded
+T_STR = "str"
+
 
 switch = {
     "+"  : ADD,
@@ -63,5 +67,5 @@ types = {
 }
 
 keywords = {
-    SAY
+    SAY, BOOL_T, BOOL_F
 }

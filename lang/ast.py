@@ -26,6 +26,21 @@ class Number(AST):
         return "number"
 
 
+class Boolean(AST):
+    """
+    Represents a boolean in the AST
+    """
+
+    def __init__(self, token: Token):
+        self.token = token
+
+    def value(self) -> int:
+        return self.token.value
+
+    def name(self) -> str:
+        return "number"
+
+
 class UnaryOperator(AST):
     """
     Represents a unary operator (eg, unary +/-, floor)
@@ -34,6 +49,9 @@ class UnaryOperator(AST):
     def __init__(self, token: Token, child: AST):
         self.token = token
         self.child = child
+
+    def value(self) -> str:
+        return self.token.value
 
     def type(self) -> str:
         return self.token.type
@@ -52,6 +70,9 @@ class BinaryOperator(AST):
         self.token = token
         self.right = right
 
+    def value(self) -> str:
+        return self.token.value
+
     def type(self) -> str:
         return self.token.type
 
@@ -67,11 +88,23 @@ class Variable(AST):
     def __init__(self, token: Token):
         self.token = token
 
-    def id(self) -> str:
+    def value(self) -> str:
         return self.token.value
 
     def name(self) -> str:
         return "variable"
+
+
+class Type(AST):
+
+    def __init__(self, token: Token):
+        self.token = token
+
+    def value(self) -> int:
+        return self.token.value
+
+    def name(self) -> str:
+        return "type"
 
 
 class AssignmentStatement(AST):
@@ -102,12 +135,12 @@ class VariableDeclaration(AST):
     Represents a variable declaration
     """
 
-    def __init__(self, variable: AST, type: Token):
+    def __init__(self, variable: AST, type: AST):
         self.variable = variable
         self.type = type
 
-    def id(self) -> str:
-        return self.variable.id()
+    def value(self) -> str:
+        return self.variable.value()
 
     def name(self) -> str:
         return "variable_declaration"

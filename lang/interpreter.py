@@ -3,8 +3,10 @@ import lang.tokens as tkns
 from lang.lexer import Token, Lexer
 from lang.parser import Parser
 from lang.ast import AST
+from lang.symtab import SymbolTable, TypeSymbol, VariableSymbol
 
 # Interpreter
+
 
 class Visitor(object):
     """
@@ -18,14 +20,91 @@ class Visitor(object):
         Calls appropriate visit method for a node type
         """
 
-        return getattr(self, node.name(), self.visit_error)(node)
+        return getattr(self, node.name(), self.default)(node)
 
-    def visit_error(self, node: AST):
+    def default(self, node: AST):
         """
-        Raises error if no visit method for a node type
+        Does nothing, default response for nodes
         """
 
-        raise ValueError("No visit method for node type: {}", node.name())
+        return
+
+
+class SymbolTableBuilder(Visitor):
+    """
+    Builds symbol table for interpreter
+    """
+
+    def __init__(self):
+        self.table = SymbolTable()
+
+    def variable(self, node: AST) -> None:
+        """
+        Visits a variable
+        """
+
+        name = node.value()
+
+        if not self.table.get(name):
+            raise NameError(
+                "Variable \"{}\" referenced before declaration".format(name))
+
+    def variable_declaration(self, node: AST) -> None:
+        """
+        Visits a variable_declaration
+        """
+
+        name = node.value()
+        type = node.type.value()
+
+        if self.table.exists(name):
+            raise NameError(
+                "Variable \"{}\" declared more than once".format(name))
+
+        type_sym = TypeSymbol(type)
+        var_sym = VariableSymbol(name, type_sym)
+
+        self.table.put(var_sym)
+
+    def unary_operator(self, node: AST) -> None:
+        """
+        Visits a unary operator
+        """
+
+        self.visit(node.child)
+
+    def binary_operator(self, node: AST) -> None:
+        """
+        Visits a binary operator
+        """
+
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def assignment_statement(self, node: AST) -> None:
+        """
+        Visits an assignment statement
+        """
+
+        self.visit(node.left)
+        self.visit(node.right)
+
+    def program(self, node: AST) -> None:
+        """
+        Visits a program
+        """
+
+        for statement in node.statements:
+            self.visit(statement)
+
+    def construct(self, tree: AST) -> SymbolTable:
+        """
+        Constructs a symbol table given an ast
+        """
+
+        self.visit(tree)
+
+        return self.table
 
 
 class Interpreter(Visitor):
@@ -33,19 +112,12 @@ class Interpreter(Visitor):
     Evaluates expressions from the parser
     """
 
-    def __init__(self, text: str = None):
+    def __init__(self):
         """
         Initializes interpreter with a parser, used to eval. expressions
         """
 
-        self.global_scope = {}
-
-    def syntax_error(self, syntax: object):
-        """
-        Raises syntax error
-        """
-
-        raise TypeError("Invalid syntax \"" + str(syntax) + "\"")
+        self.global_memory = {}
 
     def number(self, node: AST) -> int:
         """
@@ -70,7 +142,7 @@ class Interpreter(Visitor):
         if type == tkns.ROUND:
             return round(self.visit(node.child))
 
-        self.syntax_error(type)
+        raise SyntaxError("Invalid operator \"{}\"".format(node.value()))
 
     def binary_operator(self, node: AST) -> int:
         """
@@ -95,31 +167,23 @@ class Interpreter(Visitor):
         if type == tkns.I_DIV:
             return self.visit(node.left) // self.visit(node.right)
 
-        self.syntax_error(type)
+        raise SyntaxError("Invalid operator \"{}\"".format(node.value()))
 
     def variable(self, node: AST) -> AST:
         """
         Interprets a variable
         """
 
-        var = node.id()
-        
-        if var not in self.global_scope:
-            raise NameError("Variable \"{}\" referenced before declaration".format(var))
-
-        return self.global_scope[var]
+        var = node.value()
+        return self.global_memory[var]
 
     def variable_declaration(self, node: AST) -> None:
         """
         Interprets a variable declaration
         """
 
-        var = node.id()
-
-        if var in self.global_scope:
-            raise NameError("Variable \"{}\" declared more than once".format(var))
-
-        self.global_scope[var] = None
+        var = node.value()
+        self.global_memory[var] = None
 
     def say(self, node: AST) -> None:
         """
@@ -127,7 +191,6 @@ class Interpreter(Visitor):
         """
 
         visited = self.visit(node.to_say)
-
         print(str(visited))
 
     def assignment_statement(self, node: AST) -> None:
@@ -135,8 +198,8 @@ class Interpreter(Visitor):
         Interprets an assignment statement
         """
 
-        var = node.left.id()
-        self.global_scope[var] = self.visit(node.right)
+        var = node.left.value()
+        self.global_memory[var] = self.visit(node.right)
 
     def program(self, node: AST) -> None:
         """
@@ -146,17 +209,15 @@ class Interpreter(Visitor):
         for child in node.statements:
             self.visit(child)
 
-    def empty(self, node: AST) -> None:
-        """
-        Interprets an empty expression
-        """
-
-        return
-
     def interpret(self, text: str) -> str:
         """
         Interprets a line of text.
         """
 
         parser = Parser(Lexer(text))
-        self.visit(parser.parse())
+        tree = parser.parse()
+
+        builder = SymbolTableBuilder()
+        symbol_table = builder.construct(tree)
+
+        self.visit(tree)
