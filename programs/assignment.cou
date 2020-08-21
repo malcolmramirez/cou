@@ -25,7 +25,7 @@ say1: real = c - 18 - b + 0.25;
 say say1;
 say c - 18 - b + 0.25;
 
-say x * 10 - ~say1;
+say x * 10 - say1;
 
 
 # Just kidding

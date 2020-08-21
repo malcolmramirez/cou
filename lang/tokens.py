@@ -5,15 +5,21 @@ REAL_CONST = "rconst"
 BOOL_T = "true"
 BOOL_F = "false"
 
+STR_CONST = "sconst"
+
 ID = "id"
 EOF = "eof"
 
 TYPE = "type"
+CHAR = "char"
 
 # Terminals
 ADD = "add"
 SUB = "sub"
-ROUND = "round"
+
+NOT = "not"
+AND = "and"
+OR = "or"
 
 MUL = "mul"
 DIV = "div"
@@ -21,6 +27,8 @@ I_DIV = "idiv"
 
 L_PAREN = "lparen"
 R_PAREN = "rparen"
+
+QUOTE = "quote"
 
 START = "start"
 RETURN = "return"
@@ -39,18 +47,18 @@ SAY = "say"
 T_INT = "int"
 T_REAL = "real"
 T_BOOL = "bool"
-
-# Currently unadded
 T_STR = "str"
-
 
 switch = {
     "+"  : ADD,
     "-"  : SUB,
     "*"  : MUL,
     "/"  : DIV,
-    "~/" : I_DIV,
-    "~"  : ROUND,
+    "%/" : I_DIV,
+    "~"  : NOT,
+    "&:" : AND,
+    "?:" : OR,
+    "'"  : QUOTE,
     "("  : L_PAREN,
     ")"  : R_PAREN,
     "{"  : START,

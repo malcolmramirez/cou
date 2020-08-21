@@ -39,7 +39,7 @@ class Parser:
     def operand(self) -> AST:
         """
         Parses an operand
-            operand : number | (expression) | (add|sub|round) operand | variable
+            operand : number | bool | string | (expression) | (add|sub|round) operand | variable
         """
 
         operand_token = self.curr
@@ -49,11 +49,19 @@ class Parser:
             self.consume(operand_token.type)
             node = Number(operand_token)
 
+        elif operand_token.type in (tkns.BOOL_T, tkns.BOOL_F):
+            self.consume(operand_token.type)
+            node = Boolean(operand_token)
+
+        elif operand_token.type in (tkns.STR_CONST):
+            self.consume(operand_token.type)
+            node = String(operand_token)
+
         elif operand_token.type == tkns.ID:
             self.consume(tkns.ID)
             node = Variable(operand_token)
 
-        elif operand_token.type in (tkns.ADD, tkns.SUB, tkns.ROUND):
+        elif operand_token.type in (tkns.ADD, tkns.SUB, tkns.NOT):
             self.consume(operand_token.type)
             node = UnaryOperator(operand_token, self.operand())
 
@@ -98,6 +106,17 @@ class Parser:
             operator = self.curr
 
         return node
+
+    def string(self) -> AST:
+        """
+        Parses a string
+            string : quote char* quote
+        """
+
+        token = self.curr
+        self.consume(tkns.T_STR)
+
+        return String(token)
 
     def variable(self) -> AST:
         """
@@ -152,7 +171,6 @@ class Parser:
 
         if token.type == tkns.COLON:
             self.consume(tkns.COLON)
-
             type = self.type()
             to_assign = VariableDeclaration(to_assign, type)
 
@@ -163,7 +181,7 @@ class Parser:
     def statement(self) -> AST:
         """
         Parses a statement
-            statement : empty | assignment_statement sep | say sep
+            statement : [ empty | assignment_statement | say | operand ] sep
         """
 
         token = self.curr
@@ -173,6 +191,9 @@ class Parser:
 
         elif token.type == tkns.SAY:
             stmt = self.say()
+
+        elif token.type == tkns.SAY:
+            stmt = self.operand()
 
         else:
             stmt = self.empty()

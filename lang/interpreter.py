@@ -3,7 +3,7 @@ import lang.tokens as tkns
 from lang.lexer import Token, Lexer
 from lang.parser import Parser
 from lang.ast import AST
-from lang.symtab import SymbolTable, TypeSymbol, VariableSymbol
+from lang.symbol import SymbolTable, TypeSymbol, VariableSymbol
 
 # Interpreter
 
@@ -45,7 +45,7 @@ class SymbolTableBuilder(Visitor):
 
         name = node.value()
 
-        if not self.table.get(name):
+        if not self.table.exists(name):
             raise NameError(
                 "Variable \"{}\" referenced before declaration".format(name))
 
@@ -126,9 +126,23 @@ class Interpreter(Visitor):
 
         return node.value()
 
-    def unary_operator(self, node: AST) -> int:
+    def boolean(self, node: AST) -> bool:
         """
-        Visits a unary operator (can only be +/-)
+        Visits a boolean node (just needs to return the value)
+        """
+
+        return node.value()
+
+    def string(self, node: AST) -> bool:
+        """
+        Visits a boolean node (just needs to return the value)
+        """
+
+        return node.value()
+
+    def numeric_unary_operator(self, node: AST) -> int:
+        """
+        Visits a unary operator (can be +/-/~)
         """
 
         type = node.type()
@@ -139,12 +153,9 @@ class Interpreter(Visitor):
         if type == tkns.SUB:
             return -self.visit(node.child)
 
-        if type == tkns.ROUND:
-            return round(self.visit(node.child))
-
         raise SyntaxError("Invalid operator \"{}\"".format(node.value()))
 
-    def binary_operator(self, node: AST) -> int:
+    def numeric_binary_operator(self, node: AST) -> int:
         """
         Visits a binary operator node on the AST (will recur until a number is
         retrieved)
@@ -167,7 +178,25 @@ class Interpreter(Visitor):
         if type == tkns.I_DIV:
             return self.visit(node.left) // self.visit(node.right)
 
-        raise SyntaxError("Invalid operator \"{}\"".format(node.value()))
+        raise SyntaxError("Invalid numeric operator \"{}\"".format(node.value()))
+
+    def boolean_binary_operator(self, node: AST) -> bool:
+        """
+        Visits a boolean binary operator
+        """
+
+        if type == tkns.NOT:
+            return not self.visit(node.child)
+
+    def boolean_unary_operator(self, node: AST) -> bool:
+        """
+        Visits a boolean unary operator
+        """
+
+        if type == tkns.NOT:
+            return not self.visit(node.child)
+
+        raise SyntaxError("Invalid boolean operator \"{}\"".format(node.value()))
 
     def variable(self, node: AST) -> AST:
         """
@@ -220,4 +249,8 @@ class Interpreter(Visitor):
         builder = SymbolTableBuilder()
         symbol_table = builder.construct(tree)
 
+        print(symbol_table)
+
         self.visit(tree)
+
+        print(self.global_memory)

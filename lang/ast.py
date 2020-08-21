@@ -38,8 +38,22 @@ class Boolean(AST):
         return self.token.value
 
     def name(self) -> str:
-        return "number"
+        return "boolean"
 
+class String(AST):
+    """
+    Represents a string in the AST
+    """
+
+    def __init__(self, token: Token):
+        self.token = token
+
+    def value(self) -> int:
+        return self.token.value
+
+    def name(self) -> str:
+        return "string"
+        
 
 class UnaryOperator(AST):
     """

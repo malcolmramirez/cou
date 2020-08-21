@@ -144,6 +144,23 @@ class Lexer:
 
         return Token(tkns.ID, id)
 
+    def string_token(self) -> Token:
+        """
+        Parses a string
+        """
+
+        s = ''
+        self.increment()
+
+        while self.curr != "'" or (self.curr == '\\' and self.next() == "'"):
+            s += self.curr
+            self.increment()
+
+        self.increment()
+
+        return Token(tkns.STR_CONST, s)
+
+
     def token(self) -> Token:
         """
         Returns next token in stream
@@ -156,10 +173,13 @@ class Lexer:
         if not char:
             return Token(tkns.EOF, None)
 
+        elif char == "'":
+            return self.string_token()
+
         elif char == '.' or char.isdigit():
             return self.number_token()
 
-        elif char == "~" and self.next() == "/":
+        elif char == "%" and self.next() == "/":
             # Case of integer division
             char += "/"
             self.increment()
@@ -171,7 +191,7 @@ class Lexer:
             if char.isalpha() or char == "_":
                 return self.id_token()
 
-            raise SyntaxError("Unexpected character \"" + char + "\"")
+            raise SyntaxError("Invalid identifier character: {}".format(char))
 
         token = Token(type, char)
         self.increment()

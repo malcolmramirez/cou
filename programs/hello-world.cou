@@ -1,0 +1,4 @@
+
+s: str = 'hello world';
+
+say s;
