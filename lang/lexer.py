@@ -150,14 +150,19 @@ class Lexer:
         """
 
         s = ''
+
+        prev = self.curr
         self.increment()
 
-        while self.curr != "'" or (self.curr == '\\' and self.next() == "'"):
+        while self.curr != "'" or (prev == "\\" and self.curr == "'"):
             s += self.curr
+            prev = self.curr
             self.increment()
 
         self.increment()
 
+        # Decode escape characters
+        s = bytes(s, "utf-8").decode("unicode_escape")
         return Token(tkns.STR_CONST, s)
 
 
