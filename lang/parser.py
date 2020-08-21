@@ -129,16 +129,16 @@ class Parser:
 
         return Variable(token)
 
-    def type(self) -> AST:
+    def variable_type(self) -> AST:
         """
         Parses a type
-            type : int | real | bool
+            type : int | real | bool | str
         """
 
         token = self.curr
         self.consume(tkns.TYPE)
 
-        return Type(token)
+        return VariableType(token)
 
     def say(self) -> AST:
         """
@@ -171,8 +171,7 @@ class Parser:
 
         if token.type == tkns.COLON:
             self.consume(tkns.COLON)
-            type = self.type()
-            to_assign = VariableDeclaration(to_assign, type)
+            to_assign = VariableDeclaration(to_assign, self.variable_type())
 
         self.consume(tkns.ASSIGN)
 

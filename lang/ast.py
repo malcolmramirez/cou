@@ -18,10 +18,7 @@ class Number(AST):
     """
 
     def __init__(self, token: Token):
-        self.token = token
-
-    def value(self) -> int:
-        return self.token.value
+        self.value = token.value
 
     def name(self) -> str:
         return "number"
@@ -33,10 +30,7 @@ class Boolean(AST):
     """
 
     def __init__(self, token: Token):
-        self.token = token
-
-    def value(self) -> int:
-        return self.token.value
+        self.value = token.value
 
     def name(self) -> str:
         return "boolean"
@@ -48,10 +42,7 @@ class String(AST):
     """
 
     def __init__(self, token: Token):
-        self.token = token
-
-    def value(self) -> int:
-        return self.token.value
+        self.value = token.value
 
     def name(self) -> str:
         return "string"
@@ -63,14 +54,8 @@ class UnaryOperator(AST):
     """
 
     def __init__(self, token: Token, child: AST):
-        self.token = token
+        self.value = token.type
         self.child = child
-
-    def value(self) -> str:
-        return self.token.value
-
-    def type(self) -> str:
-        return self.token.type
 
     def name(self) -> str:
         return "unary_operator"
@@ -83,14 +68,8 @@ class BinaryOperator(AST):
 
     def __init__(self, left: AST, token: Token, right: AST):
         self.left = left
-        self.token = token
+        self.value = token.type
         self.right = right
-
-    def value(self) -> str:
-        return self.token.value
-
-    def type(self) -> str:
-        return self.token.type
 
     def name(self) -> str:
         return "binary_operator"
@@ -102,25 +81,19 @@ class Variable(AST):
     """
 
     def __init__(self, token: Token):
-        self.token = token
-
-    def value(self) -> str:
-        return self.token.value
+        self.value = token.value
 
     def name(self) -> str:
         return "variable"
 
 
-class Type(AST):
+class VariableType(AST):
 
     def __init__(self, token: Token):
-        self.token = token
-
-    def value(self) -> int:
-        return self.token.value
+        self.value = token.value
 
     def name(self) -> str:
-        return "type"
+        return "variable_type"
 
 
 class AssignmentStatement(AST):
@@ -130,7 +103,7 @@ class AssignmentStatement(AST):
 
     def __init__(self, left: AST, token: Token, right: AST):
         self.left = left
-        self.token = token
+        self.value = token.value
         self.right = right
 
     def name(self) -> str:
@@ -151,12 +124,10 @@ class VariableDeclaration(AST):
     Represents a variable declaration
     """
 
-    def __init__(self, variable: AST, type: AST):
+    def __init__(self, variable: AST, variable_type: AST):
         self.variable = variable
-        self.type = type
-
-    def value(self) -> str:
-        return self.variable.value()
+        self.value = variable.value
+        self.variable_type = variable_type
 
     def name(self) -> str:
         return "variable_declaration"
@@ -168,7 +139,7 @@ class Say(AST):
     """
 
     def __init__(self, to_say: AST):
-        self.to_say = to_say
+        self.value = to_say
 
     def name(self) -> str:
         return "say"
