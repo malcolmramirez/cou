@@ -140,7 +140,7 @@ class Interpreter(Visitor):
 
         return node.value()
 
-    def numeric_unary_operator(self, node: AST) -> int:
+    def unary_operator(self, node: AST) -> int:
         """
         Visits a unary operator (can be +/-/~)
         """
@@ -155,7 +155,7 @@ class Interpreter(Visitor):
 
         raise SyntaxError("Invalid operator \"{}\"".format(node.value()))
 
-    def numeric_binary_operator(self, node: AST) -> int:
+    def binary_operator(self, node: AST) -> int:
         """
         Visits a binary operator node on the AST (will recur until a number is
         retrieved)
@@ -179,24 +179,6 @@ class Interpreter(Visitor):
             return self.visit(node.left) // self.visit(node.right)
 
         raise SyntaxError("Invalid numeric operator \"{}\"".format(node.value()))
-
-    def boolean_binary_operator(self, node: AST) -> bool:
-        """
-        Visits a boolean binary operator
-        """
-
-        if type == tkns.NOT:
-            return not self.visit(node.child)
-
-    def boolean_unary_operator(self, node: AST) -> bool:
-        """
-        Visits a boolean unary operator
-        """
-
-        if type == tkns.NOT:
-            return not self.visit(node.child)
-
-        raise SyntaxError("Invalid boolean operator \"{}\"".format(node.value()))
 
     def variable(self, node: AST) -> AST:
         """
@@ -249,8 +231,4 @@ class Interpreter(Visitor):
         builder = SymbolTableBuilder()
         symbol_table = builder.construct(tree)
 
-        print(symbol_table)
-
         self.visit(tree)
-
-        print(self.global_memory)
