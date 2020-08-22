@@ -221,7 +221,7 @@ class Interpreter(Visitor):
         if not typeutils.is_assignable(cou_type, asn):
             raise SyntaxError("Cannot assign '{}' to type '{}'".format(asn, cou_type))
 
-        self.global_memory[var_id] = assigned
+        self.global_memory[var_id] = asn
 
     def program(self, node: AST) -> None:
         """
