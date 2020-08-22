@@ -1,4 +1,5 @@
 import lang.tokens as tkns
+import lang.typeutils as typeutils
 
 from lang.lexer import Token, Lexer
 from lang.parser import Parser
@@ -112,11 +113,16 @@ class Interpreter(Visitor):
     Evaluates expressions from the parser
     """
 
-    def __init__(self):
+    def __init__(self, text: str):
         """
         Initializes interpreter with a parser, used to eval. expressions
         """
 
+        parser = Parser(Lexer(text))
+        builder = SymbolTableBuilder()
+
+        self.tree = parser.parse()
+        self.symbol_table = builder.construct(self.tree)
         self.global_memory = {}
 
     def number(self, node: AST) -> int:
@@ -178,7 +184,7 @@ class Interpreter(Visitor):
         if op_type == tkns.I_DIV:
             return self.visit(node.left) // self.visit(node.right)
 
-        raise SyntaxError("Invalid numeric operator \"{}\"".format(node.value))
+        raise SyntaxError("Invalid operator \"{}\"".format(node.value))
 
     def variable(self, node: AST) -> AST:
         """
@@ -207,10 +213,15 @@ class Interpreter(Visitor):
         Interprets an assignment statement
         """
 
-        var_identifer = node.left.value
-        assigned = self.visit(node.right)
+        var_id = node.left.value
+        asn = self.visit(node.right)
 
-        self.global_memory[var_identifer] = assigned
+        cou_type = self.symbol_table.get(var_id).type_name
+
+        if not typeutils.is_assignable(cou_type, asn):
+            raise SyntaxError("Cannot assign '{}' to type '{}'".format(asn, cou_type))
+
+        self.global_memory[var_id] = assigned
 
     def program(self, node: AST) -> None:
         """
@@ -220,15 +231,9 @@ class Interpreter(Visitor):
         for child in node.statements:
             self.visit(child)
 
-    def interpret(self, text: str) -> None:
+    def interpret(self) -> None:
         """
         Interprets a line of text.
         """
 
-        parser = Parser(Lexer(text))
-        tree = parser.parse()
-
-        builder = SymbolTableBuilder()
-        symbol_table = builder.construct(tree)
-
-        self.visit(tree)
+        self.visit(self.tree)

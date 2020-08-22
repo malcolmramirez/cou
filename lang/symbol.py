@@ -1,15 +1,14 @@
 import lang.tokens as tkns
 from collections import defaultdict
 
-
 class Symbol(object):
     """
     Superclass for symbols
     """
 
-    def __init__(self, name: str, type=None):
+    def __init__(self, name: str, type_def = None):
         self.name = name
-        self.type = type
+        self.type_def = type_def
 
     def __repr__(self) -> str:
         return str(self)
@@ -32,11 +31,13 @@ class VariableSymbol(Symbol):
     Represents a variable symbol (with an identifier and type)
     """
 
-    def __init__(self, name: str, type: TypeSymbol = None):
-        super().__init__(name, type)
+    def __init__(self, name: str, type_def: Symbol = None):
+        super().__init__(name, type_def)
+        self.type_name = type_def.name
+
 
     def __str__(self) -> str:
-        return "[{}:{}]".format(self.type, self.name)
+        return "[{}:{}]".format(self.type_def, self.name)
 
 
 class SymbolTable(object):

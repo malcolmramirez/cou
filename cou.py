@@ -9,9 +9,6 @@ if __name__ == "__main__":
         print("Usage: python3 cou.py [file]")
 
     else:
-
-        file = sys.argv[1]
-        intr = Interpreter()
-
-        with open(file) as content:
-            intr.interpret(content.read())
+        with open(sys.argv[1]) as content:
+            intr = Interpreter(content.read())
+            intr.interpret()
