@@ -11,7 +11,6 @@ ID = "id"
 EOF = "eof"
 
 TYPE = "type"
-CHAR = "char"
 
 # Terminals
 ADD = "add"
@@ -49,6 +48,18 @@ T_REAL = "real"
 T_BOOL = "bool"
 T_STR = "str"
 
+BINARY_OPERANDS = {
+    ADD, SUB, MUL, DIV, I_DIV, AND, OR
+}
+
+TYPES = {
+    T_INT, T_REAL, T_STR, T_BOOL
+}
+
+KEYWORDS = {
+    SAY, BOOL_T, BOOL_F
+}
+
 switch = {
     "+"  : ADD,
     "-"  : SUB,
@@ -68,12 +79,4 @@ switch = {
     ":"  : COLON,
     "#"  : COMMENT,
     "=>" : RETURN
-}
-
-types = {
-    T_INT, T_REAL, T_STR, T_BOOL
-}
-
-keywords = {
-    SAY, BOOL_T, BOOL_F
 }

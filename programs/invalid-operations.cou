@@ -1,0 +1,13 @@
+
+i: int = 1;
+r: real = 1.0;
+b: bool = true;
+s: str = 'hello world';
+
+r = i + r; # this should work
+say r;
+
+# i = i + r;
+# r = b - i;
+# s = s %/ r;
+# b = b / i;

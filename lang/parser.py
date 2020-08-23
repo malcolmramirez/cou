@@ -23,7 +23,7 @@ class Parser:
         Raises syntax error
         """
 
-        raise TypeError("Invalid syntax: parser \"" + str(syntax) + "\"")
+        raise SyntaxError("Invalid syntax \"" + str(syntax) + "\"")
 
     def consume(self, type: str) -> None:
         """
@@ -32,7 +32,7 @@ class Parser:
         """
 
         if self.curr.type != type:
-            self.syntax_error(self.curr.value)
+            raise SyntaxError("Expected '{}'".format(type))
 
         self.curr = self.lexer.token()
 
@@ -84,7 +84,7 @@ class Parser:
         node = self.operand()
         operator = self.curr
 
-        while operator.type in (tkns.MUL, tkns.DIV, tkns.I_DIV):
+        while operator.type in tkns.BINARY_OPERANDS:
             self.consume(operator.type)
             node = BinaryOperator(node, operator, self.operand())
             operator = self.curr
@@ -190,9 +190,6 @@ class Parser:
 
         elif token.type == tkns.SAY:
             stmt = self.say()
-
-        elif token.type == tkns.SAY:
-            stmt = self.operand()
 
         else:
             stmt = self.empty()

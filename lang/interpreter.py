@@ -3,7 +3,7 @@ import lang.typeutils as typeutils
 
 from lang.lexer import Token, Lexer
 from lang.parser import Parser
-from lang.ast import AST
+from lang.ast import AST, BinaryOperator
 from lang.symbol import SymbolTable, TypeSymbol, VariableSymbol
 
 # Interpreter
@@ -36,7 +36,8 @@ class SymbolTableBuilder(Visitor):
     Builds symbol table for interpreter
     """
 
-    def __init__(self):
+    def __init__(self, tree: AST):
+        self.tree = tree
         self.table = SymbolTable()
 
     def variable(self, node: AST) -> None:
@@ -48,7 +49,7 @@ class SymbolTableBuilder(Visitor):
 
         if not self.table.exists(var_name):
             raise NameError(
-                "Variable \"{}\" referenced before declaration".format(var_name))
+                "Variable '{}' referenced before declaration".format(var_name))
 
     def variable_declaration(self, node: AST) -> None:
         """
@@ -60,7 +61,7 @@ class SymbolTableBuilder(Visitor):
 
         if self.table.exists(var_name):
             raise NameError(
-                "Variable \"{}\" declared more than once".format(var_name))
+                "Variable '{}' declared more than once".format(var_name))
 
         type_sym = TypeSymbol(var_type)
         var_sym = VariableSymbol(var_name, type_sym)
@@ -98,12 +99,12 @@ class SymbolTableBuilder(Visitor):
         for statement in node.statements:
             self.visit(statement)
 
-    def construct(self, tree: AST) -> SymbolTable:
+    def construct(self) -> SymbolTable:
         """
         Constructs a symbol table given an ast
         """
 
-        self.visit(tree)
+        self.visit(self.tree)
 
         return self.table
 
@@ -119,10 +120,10 @@ class Interpreter(Visitor):
         """
 
         parser = Parser(Lexer(text))
-        builder = SymbolTableBuilder()
 
         self.tree = parser.parse()
-        self.symbol_table = builder.construct(self.tree)
+        self.symbol_table = SymbolTableBuilder(self.tree).construct()
+
         self.global_memory = {}
 
     def number(self, node: AST) -> int:
@@ -141,14 +142,14 @@ class Interpreter(Visitor):
 
     def string(self, node: AST) -> bool:
         """
-        Visits a boolean node (just needs to return the value)
+        Visits a string node (just needs to return the value)
         """
 
         return node.value
 
     def unary_operator(self, node: AST) -> int:
         """
-        Visits a unary operator (can be +/-/~)
+        Visits a unary operator (can be +/-)
         """
 
         type = node.value
@@ -159,7 +160,7 @@ class Interpreter(Visitor):
         if type == tkns.SUB:
             return -self.visit(node.child)
 
-        raise SyntaxError("Invalid operator \"{}\"".format(node.value))
+        raise SyntaxError("Invalid operator '{}'".format(node.value))
 
     def binary_operator(self, node: AST) -> int:
         """
@@ -169,22 +170,28 @@ class Interpreter(Visitor):
 
         op_type = node.value
 
+        l = self.visit(node.left)
+        r = self.visit(node.right)
+
+        if not typeutils.valid_operation(l, r):
+            raise SyntaxError("Operation '{}' invalid between '{}' and '{}'".format(op_type, l, r))
+
         if op_type == tkns.ADD:
-            return self.visit(node.left) + self.visit(node.right)
+            return l + r
 
         if op_type == tkns.SUB:
-            return self.visit(node.left) - self.visit(node.right)
+            return l - r
 
         if op_type == tkns.MUL:
-            return self.visit(node.left) * self.visit(node.right)
+            return l * r
 
         if op_type == tkns.DIV:
-            return self.visit(node.left) / self.visit(node.right)
+            return l / r
 
         if op_type == tkns.I_DIV:
-            return self.visit(node.left) // self.visit(node.right)
+            return l // r
 
-        raise SyntaxError("Invalid operator \"{}\"".format(node.value))
+        raise SyntaxError("Invalid binary operator '{}'".format(node.value))
 
     def variable(self, node: AST) -> AST:
         """
@@ -218,8 +225,12 @@ class Interpreter(Visitor):
 
         cou_type = self.symbol_table.get(var_id).type_name
 
-        if not typeutils.is_assignable(cou_type, asn):
-            raise SyntaxError("Cannot assign '{}' to type '{}'".format(asn, cou_type))
+        if not typeutils.valid_assignment(cou_type, asn):
+
+            if cou_type != tkns.T_REAL or not isinstance(asn, int):
+                raise SyntaxError("Cannot assign '{}' to type '{}'".format(asn, cou_type))
+
+            asn = float(asn) # Special case for assigning an int to a real
 
         self.global_memory[var_id] = asn
 

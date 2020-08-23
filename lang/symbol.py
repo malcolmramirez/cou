@@ -47,7 +47,7 @@ class SymbolTable(object):
 
     def __init__(self):
         self.symbols = defaultdict()
-        for name in tkns.types:
+        for name in tkns.TYPES:
             self.symbols[name] = TypeSymbol(name)
 
     def __str__(self) -> str:

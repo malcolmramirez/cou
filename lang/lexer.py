@@ -136,10 +136,10 @@ class Lexer:
             id += self.curr
             self.increment()
 
-        if id in tkns.types:
+        if id in tkns.TYPES:
             return Token(tkns.TYPE, id)
 
-        elif id in tkns.keywords:
+        elif id in tkns.KEYWORDS:
             return Token(id, id)
 
         return Token(tkns.ID, id)
@@ -183,10 +183,13 @@ class Lexer:
         elif char == '.' or char.isdigit():
             return self.number_token()
 
-        elif char == "%" and self.next() == "/":
-            # Case of integer division
-            char += "/"
+        if char == "%" and self.next() == "/" or \
+                char == "&" and self.next() == ":" or \
+                char == "?" and self.next() == ":" or \
+                char == "=" and self.next() == ">":
+            # Parses all double char tokens
             self.increment()
+            char += self.curr
 
         type = tkns.switch.get(char)
 
@@ -195,7 +198,7 @@ class Lexer:
             if char.isalpha() or char == "_":
                 return self.id_token()
 
-            raise SyntaxError("Invalid identifier character: {}".format(char))
+            raise SyntaxError("Invalid character: {}".format(char))
 
         token = Token(type, char)
         self.increment()
