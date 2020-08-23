@@ -122,17 +122,9 @@ class Lexer:
         Parses a variable identifier, type, or keyword
         """
 
-        def valid(char: str) -> bool:
-            """
-            Validates a character to be used in identifier
-            """
-
-            return self.curr and \
-                (self.curr.isalnum() or self.curr == "_")
-
         id = ''
 
-        while valid(self.curr):
+        while self.curr and (self.curr.isalnum() or self.curr == "_"):
             id += self.curr
             self.increment()
 

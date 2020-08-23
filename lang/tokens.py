@@ -20,6 +20,9 @@ NOT = "not"
 AND = "and"
 OR = "or"
 
+EQ = "eq"
+NEQ = "neq"
+
 MUL = "mul"
 DIV = "div"
 I_DIV = "idiv"
@@ -30,7 +33,7 @@ R_PAREN = "rparen"
 QUOTE = "quote"
 
 START = "start"
-RETURN = "return"
+RETURN = "ret"
 END = "end"
 
 ASSIGN = "assign"
@@ -49,7 +52,7 @@ T_BOOL = "bool"
 T_STR = "str"
 
 BINARY_OPERANDS = {
-    ADD, SUB, MUL, DIV, I_DIV, AND, OR
+    ADD, SUB, MUL, DIV, I_DIV, AND, OR, EQ, NEQ
 }
 
 TYPES = {
@@ -57,7 +60,7 @@ TYPES = {
 }
 
 KEYWORDS = {
-    SAY, BOOL_T, BOOL_F
+    SAY, BOOL_T, BOOL_F, RETURN
 }
 
 switch = {
@@ -66,9 +69,11 @@ switch = {
     "*"  : MUL,
     "/"  : DIV,
     "%/" : I_DIV,
-    "~"  : NOT,
+    "!"  : NOT,
     "&:" : AND,
     "?:" : OR,
+    "==" : EQ,
+    "!=" : NEQ,
     "'"  : QUOTE,
     "("  : L_PAREN,
     ")"  : R_PAREN,
@@ -77,6 +82,5 @@ switch = {
     "="  : ASSIGN,
     ";"  : SEP,
     ":"  : COLON,
-    "#"  : COMMENT,
-    "=>" : RETURN
+    "#"  : COMMENT
 }

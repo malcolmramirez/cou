@@ -3,7 +3,7 @@ import lang.typeutils as typeutils
 
 from lang.lexer import Token, Lexer
 from lang.parser import Parser
-from lang.ast import AST, BinaryOperator
+from lang.ast import AST
 from lang.symbol import SymbolTable, TypeSymbol, VariableSymbol
 
 # Interpreter
@@ -174,7 +174,8 @@ class Interpreter(Visitor):
         r = self.visit(node.right)
 
         if not typeutils.valid_operation(l, r):
-            raise SyntaxError("Operation '{}' invalid between '{}' and '{}'".format(op_type, l, r))
+            raise SyntaxError(
+                "Operation '{}' invalid between '{}' and '{}'".format(op_type, l, r))
 
         if op_type == tkns.ADD:
             return l + r
@@ -228,9 +229,10 @@ class Interpreter(Visitor):
         if not typeutils.valid_assignment(cou_type, asn):
 
             if cou_type != tkns.T_REAL or not isinstance(asn, int):
-                raise SyntaxError("Cannot assign '{}' to type '{}'".format(asn, cou_type))
+                raise SyntaxError(
+                    "Cannot assign '{}' to type '{}'".format(asn, cou_type))
 
-            asn = float(asn) # Special case for assigning an int to a real
+            asn = float(asn)  # Special case for assigning an int to a real
 
         self.global_memory[var_id] = asn
 

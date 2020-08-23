@@ -53,7 +53,7 @@ class Parser:
             self.consume(operand_token.type)
             node = Boolean(operand_token)
 
-        elif operand_token.type in (tkns.STR_CONST):
+        elif operand_token.type == tkns.STR_CONST:
             self.consume(operand_token.type)
             node = String(operand_token)
 
@@ -84,7 +84,7 @@ class Parser:
         node = self.operand()
         operator = self.curr
 
-        while operator.type in tkns.BINARY_OPERANDS:
+        while operator.type in (tkns.MUL, tkns.DIV, tkns.I_DIV):
             self.consume(operator.type)
             node = BinaryOperator(node, operator, self.operand())
             operator = self.curr
