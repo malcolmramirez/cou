@@ -1,7 +1,7 @@
 
 # Will be tested when call stack + functions are implemented
 
-test: int(a: int, b: int) {
+proc test: int(a: int, b: int) {
     number: int = 2;
 
     a: int = number;
