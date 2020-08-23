@@ -33,7 +33,6 @@ R_PAREN = "rparen"
 QUOTE = "quote"
 
 START = "start"
-RETURN = "ret"
 END = "end"
 
 ASSIGN = "assign"
@@ -44,6 +43,8 @@ COMMENT = "comment"
 
 # Keywords
 SAY = "say"
+RETURN = "ret"
+PROC = "proc"
 
 # Types
 T_INT = "int"
