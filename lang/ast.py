@@ -1,4 +1,4 @@
-from lang.lexer import Token
+from lang.tokenizer import Token
 
 # Abstract syntax tree
 

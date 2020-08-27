@@ -1,5 +1,8 @@
-import lang.tokens as tkns
+
+import lang.token as tok
+
 from collections import defaultdict
+from typing import Any
 
 class Symbol(object):
     """
@@ -14,30 +17,16 @@ class Symbol(object):
         return str(self)
 
 
-class TypeSymbol(Symbol):
-    """
-    Represents a type symbol (ie, int, bool, real)
-    """
-
-    def __init__(self, name: str):
-        super().__init__(name)
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class VariableSymbol(Symbol):
     """
     Represents a variable symbol (with an identifier and type)
     """
 
-    def __init__(self, name: str, type_def: Symbol = None):
+    def __init__(self, name: str, type_def: str = None):
         super().__init__(name, type_def)
-        self.type_name = type_def.name
-
 
     def __str__(self) -> str:
-        return "[{}:{}]".format(self.type_def, self.name)
+        return f"<{self.type_def}:{self.name}>"
 
 
 class SymbolTable(object):
@@ -47,13 +36,11 @@ class SymbolTable(object):
 
     def __init__(self):
         self.symbols = defaultdict()
-        for name in tkns.TYPES:
-            self.symbols[name] = TypeSymbol(name)
 
     def __str__(self) -> str:
         s = "SymbolTable: "
         for key in self.symbols:
-            s += "\n  {}".format(self.symbols[key])
+            s += f"\n  {self.symbols[key]}"
 
         return s
 
@@ -77,3 +64,36 @@ class SymbolTable(object):
         """
 
         return key in self.symbols
+
+def valid_type(cou_type: str, asn: Any):
+    """
+    Validates a cou type given an assignment
+    """
+
+    type_switch = {
+        tok.INT  : int,
+        tok.REAL : float,
+        tok.BOOL : bool,
+        tok.STR  : str
+    }
+
+    c_type = type_switch[cou_type]
+
+    return (c_type == type(asn)) or (c_type == float and isinstance(asn, int))
+
+def valid_operation(op1: Any, op2: Any):
+    """
+    Validates a cou type given an assignment
+    """
+
+    rev_type_switch = {
+        int   : tok.NUMBER,
+        float : tok.NUMBER,
+        bool  : tok.BOOL,
+        str   : tok.STR
+    }
+
+    c_type_1 = rev_type_switch[type(op1)]
+    c_type_2 = rev_type_switch[type(op2)]
+
+    return c_type_1 == c_type_2
