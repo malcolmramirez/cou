@@ -9,59 +9,64 @@ REAL = "real"
 BOOL = "bool"
 STR = "str"
 
-ADD = "add"
-SUB = "sub"
-MUL = "mul"
-DIV = "div"
-I_DIV = "idiv"
+ADD = "+"
+SUB = "-"
+MUL = "*"
+DIV = "/"
+I_DIV = "%/"
 
-NOT = "not"
+NOT = "!"
+AND = "&&"
+OR = "||"
+EQ = "=="
+NEQ = "!="
+GREATER = ">"
+LESS = "<"
+GEQ = ">="
+LEQ = "<="
 
-L_PAREN = "lparen"
-R_PAREN = "rparen"
+L_PAREN = "("
+R_PAREN = ")"
 
-L_BRACE = "lbrace"
-R_BRACE = "rbrace"
+L_BRACE = "{"
+R_BRACE = "}"
 
-ASSIGN = "assign"
+ASSIGN = "="
 
-SEP = "sep"
-COLON = "colon"
+SEP = ";"
+COLON = ":"
 
 SAY = "say"
+TOI = "toi"
+TOR = "tor"
+TOB = "tob"
+TOS = "tos"
+
 EOF = "eof"
 
 
-def one_char_token(s: str) -> str:
-    single_char_switch = {
-        '+': ADD,
-        '-': SUB,
-        '*': MUL,
-        '/': DIV,
-        '(': L_PAREN,
-        ')': R_PAREN,
-        '{': L_BRACE,
-        '}': R_BRACE,
-        '=': ASSIGN,
-        ':': COLON,
-        ';': SEP
+def is_one_char_token(s: str) -> bool:
+    single_char = {
+        ADD, SUB, MUL, DIV,
+        NOT,
+        GREATER, LESS,
+        L_PAREN, R_PAREN,
+        L_BRACE, R_BRACE,
+        ASSIGN, COLON,
+        SEP
     }
 
-    if s not in single_char_switch:
-        return None
-
-    return single_char_switch[s]
+    return s in single_char
 
 
-def two_char_token(s: str) -> str:
-    double_char_switch = {
-        '%/': I_DIV
+def is_two_char_token(s: str) -> bool:
+    double_char = {
+        I_DIV,
+        AND, OR,
+        EQ, NEQ, GEQ, LEQ
     }
 
-    if s not in double_char_switch:
-        return None
-
-    return double_char_switch[s]
+    return s in double_char
 
 
 def is_keyword(id: str) -> str:

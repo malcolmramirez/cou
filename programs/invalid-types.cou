@@ -4,5 +4,5 @@
 # r: real = false;
 # b: bool = 'hello';
 
-r: real = 1;
+# r: real = 1;
 say r;

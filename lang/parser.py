@@ -71,13 +71,13 @@ class Parser:
     def _term(self) -> AST:
         """
         Parses a term
-            term : operand ((mul|div) operand)*
+            term : operand ((mul|div|and) operand)*
         """
 
         node = self._operand()
         operator = self.curr
 
-        while operator.type in (tok.MUL, tok.DIV, tok.I_DIV):
+        while operator.type in (tok.MUL, tok.DIV, tok.I_DIV, tok.AND):
             self._consume(operator.type)
             node = BinaryOperator(node, operator, self._operand())
             operator = self.curr
@@ -87,18 +87,36 @@ class Parser:
     def _expression(self) -> AST:
         """
         Parses an expression
-            term : term ((add|sub) term)*
+            term : term ((add|sub|or) term)*
         """
 
         node = self._term()
         operator = self.curr
 
-        while operator.type in (tok.ADD, tok.SUB):
+        while operator.type in (tok.ADD, tok.SUB, tok.OR):
             self._consume(operator.type)
             node = BinaryOperator(node, operator, self._term())
             operator = self.curr
 
         return node
+
+    def _comparison(self) -> AST:
+        """
+        Parses a comparison (==, !=, <=, >=, <, >)
+            comparison = expression [ == | != | <= | >= | < | > ] expression
+        """
+
+        node = self._expression()
+        operator = self.curr
+
+        while operator.type in (tok.EQ, tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS):
+            self._consume(operator.type)
+            node = BinaryOperator(node, operator, self._expression())
+            operator = self.curr
+
+        return node
+
+
 
     def _string(self) -> AST:
         """
@@ -181,8 +199,9 @@ class Parser:
             to_assign = VariableDeclaration(to_assign, self._variable_type())
 
         self._consume(tok.ASSIGN)
+        assigned = self._expression()
 
-        return AssignmentStatement(to_assign, token, self._expression())
+        return AssignmentStatement(to_assign, token, assigned)
 
     def _statement(self) -> AST:
         """

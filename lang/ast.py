@@ -83,6 +83,7 @@ class Variable(AST):
     def __init__(self, token: Token):
         self.value = token.value
 
+
     def name(self) -> str:
         return "variable"
 

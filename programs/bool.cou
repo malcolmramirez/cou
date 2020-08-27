@@ -1,0 +1,27 @@
+b: bool = false;
+say b;
+
+b = true;
+say b;
+
+not_b: bool = !b;
+say not_b;
+
+and: bool = b && not_b;
+and = b && !and;
+say and;
+
+or: bool = b || not_b;
+say or;
+
+a: bool = true;
+b = !a;
+
+complex: bool = !!(!(a && b) || (!a && !!b)) || (!b || !a) && a;
+say complex;
+
+i1: int = 2;
+i2: int = 3;
+
+# complex = (i1 + i2) && (i1 - 2);
+# say complex;

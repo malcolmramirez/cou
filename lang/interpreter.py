@@ -1,13 +1,15 @@
+
 import lang.token as tok
+
+from typing import Any
 
 from lang.tokenizer import Token, Tokenizer
 from lang.parser import Parser
 from lang.ast import AST
 from lang.symbol import SymbolTable, VariableSymbol
-from lang.symbol import valid_type, valid_operation
+from lang.type import valid_type, valid_operation
 
 # Interpreter
-
 
 class Visitor(object):
     """
@@ -136,7 +138,7 @@ class Interpreter(Visitor):
         Visits a boolean node (just needs to return the value)
         """
 
-        return node.value == 'true'
+        return node.value
 
     def _string(self, node: AST) -> str:
         """
@@ -145,22 +147,26 @@ class Interpreter(Visitor):
 
         return node.value
 
-    def _unary_operator(self, node: AST) -> int:
+    def _unary_operator(self, node: AST) -> Any:
         """
         Visits a unary operator (can be +/-)
         """
 
         type = node.value
+        operand = self.visit(node.child)
 
-        if type == tok.ADD:
-            return self.visit(node.child)
+        if isinstance(operand, bool) and type == tok.NOT:
+            return not operand
 
-        if type == tok.SUB:
-            return -self.visit(node.child)
+        if isinstance(operand, (int, float)) and type == tok.ADD:
+            return operand
 
-        raise SyntaxError(f"Invalid operator '{node.value}'")
+        if isinstance(operand, (int, float)) and type == tok.SUB:
+            return -operand
 
-    def _binary_operator(self, node: AST) -> int:
+        raise SyntaxError(f"Invalid operator '{node.value}' for operand {operand}")
+
+    def _binary_operator(self, node: AST) -> Any:
         """
         Visits a binary operator node on the AST (will recur until a number is
         retrieved)
@@ -171,8 +177,9 @@ class Interpreter(Visitor):
         l = self.visit(node.left)
         r = self.visit(node.right)
 
-        if not valid_operation(l, r):
-            raise SyntaxError(f"Invalid operation \'{op_type.value}\' between \'{l}\', \'{r}\'")
+        if not valid_operation(l, r, op_type):
+            raise SyntaxError(
+                f"Invalid operation \'{op_type}\' between \'{l}\', \'{r}\'")
 
         if op_type == tok.ADD:
             return l + r
@@ -188,6 +195,12 @@ class Interpreter(Visitor):
 
         if op_type == tok.I_DIV:
             return l // r
+
+        if op_type == tok.OR:
+            return l or r
+
+        if op_type == tok.AND:
+            return l and r
 
         raise SyntaxError(f"Invalid binary operator '{op_type.value}'")
 
@@ -211,7 +224,13 @@ class Interpreter(Visitor):
         """
 
         visited = self.visit(node.value)
-        print(str(visited))
+        repr = str(visited)
+
+        if isinstance(visited, bool):
+            # Make it so that the string representation of booleans begin lower
+            repr = repr.lower()
+
+        print(repr)
 
     def _assignment_statement(self, node: AST) -> None:
         """

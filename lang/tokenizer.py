@@ -1,7 +1,7 @@
 import codecs
 
 
-from lang.token import one_char_token, two_char_token, is_keyword, is_boolean
+from lang.token import is_one_char_token, is_two_char_token, is_keyword, is_boolean
 import lang.token as tok
 
 class Token:
@@ -130,6 +130,7 @@ class Tokenizer(object):
 
         elif is_boolean(id):
             t_type = tok.BOOLEAN
+            id = (id == 'true')
 
         return Token(t_type, id, self.line)
 
@@ -177,21 +178,16 @@ class Tokenizer(object):
             return self._name_token()
 
         poss_tok = char + self._next()
-        t_type = two_char_token(poss_tok)
 
-        if t_type:
+        if is_two_char_token(poss_tok):
             char = poss_tok
             self._increment()
 
-        else:
-            t_type = one_char_token(char)
-
-
-        if not t_type:
+        elif not is_one_char_token(char):
             # If there is not a one char identifier at this point, bad char.
             raise SyntaxError(f"Invalid character: {char}")
 
-        token = Token(t_type, char, self.line)
+        token = Token(char, char, self.line)
         self._increment()
 
         return token
