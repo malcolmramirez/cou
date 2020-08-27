@@ -1,0 +1,7 @@
+hello: str = 'hello';
+world: str = ' world';
+bang: str = '!';
+
+hello = hello + world + bang;
+
+say hello;
