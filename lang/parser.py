@@ -1,3 +1,4 @@
+from typing import List, Callable
 
 import lang.token as tok
 from lang.tokenizer import Tokenizer
@@ -29,25 +30,25 @@ class Parser:
 
         self.curr = self._tokenizer.produce()
 
-    def _operand(self) -> AST:
+    def _factor(self) -> AST:
         """
-        Parses an operand
-            operand : number | bool | string | (expression) | (add|sub|round) operand | variable
+        Parses a factor
+            factor : number | bool | string | (disjunction) | (add|sub) factor | variable
         """
 
         operand_token = self.curr
         node = None
 
         if operand_token.type == tok.NUMBER:
-            self._consume(operand_token.type)
+            self._consume(tok.NUMBER)
             node = Number(operand_token)
 
         elif operand_token.type == tok.STRING:
-            self._consume(operand_token.type)
+            self._consume(tok.STRING)
             node = String(operand_token)
 
         elif operand_token.type == tok.BOOLEAN:
-            self._consume(operand_token.type)
+            self._consume(tok.BOOLEAN)
             node = Boolean(operand_token)
 
         elif operand_token.type == tok.ID:
@@ -56,65 +57,69 @@ class Parser:
 
         elif operand_token.type in (tok.ADD, tok.SUB, tok.NOT):
             self._consume(operand_token.type)
-            node = UnaryOperator(operand_token, self._operand())
+            node = UnaryOperator(operand_token, self._factor())
 
         elif operand_token.type == tok.L_PAREN:
             self._consume(tok.L_PAREN)
-            node = self._expression()
+            node = self._disjunction()
             self._consume(tok.R_PAREN)
 
-        else:
-            raise SyntaxError(f"Unexpected operand {operand_token.value}")
+        return node
+
+    def _parse_binop(self, func: Callable[[], AST], operator_types: List[str]) -> AST:
+        """
+        Utility method used to parse binary operators
+        """
+
+        node = func()
+        operator = self.curr
+
+        while operator.type in operator_types:
+            self._consume(operator.type)
+            node = BinaryOperator(node, operator, func())
+            operator = self.curr
 
         return node
 
     def _term(self) -> AST:
         """
         Parses a term
-            term : operand ((mul|div|and) operand)*
+            term : factor ((mul|div) factor)*
         """
 
-        node = self._operand()
-        operator = self.curr
+        return self._parse_binop(self._factor, (tok.MUL, tok.DIV, tok.I_DIV))
 
-        while operator.type in (tok.MUL, tok.DIV, tok.I_DIV, tok.AND):
-            self._consume(operator.type)
-            node = BinaryOperator(node, operator, self._operand())
-            operator = self.curr
-
-        return node
-
-    def _expression(self) -> AST:
+    def _sum(self) -> AST:
         """
-        Parses an expression
-            term : term ((add|sub|or) term)*
+        Parses a sum
+            term : term ((add|sub) term)*
         """
 
-        node = self._term()
-        operator = self.curr
-
-        while operator.type in (tok.ADD, tok.SUB, tok.OR):
-            self._consume(operator.type)
-            node = BinaryOperator(node, operator, self._term())
-            operator = self.curr
-
-        return node
+        return self._parse_binop(self._term, (tok.ADD, tok.SUB))
 
     def _comparison(self) -> AST:
         """
-        Parses a comparison (==, !=, <=, >=, <, >)
-            comparison = expression [ == | != | <= | >= | < | > ] expression
+        Parses a boolean comparison
+            comparison : sum ((eq|neq|geq|leq|greater|less) sum)*
         """
 
-        node = self._expression()
-        operator = self.curr
+        return self._parse_binop(self._sum, (tok.EQ, tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS))
 
-        while operator.type in (tok.EQ, tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS):
-            self._consume(operator.type)
-            node = BinaryOperator(node, operator, self._expression())
-            operator = self.curr
+    def _conjunction(self) -> AST:
+        """
+        Parses a conjunction
+            conjunction : comparison (or comparison)*
+        """
 
-        return node
+        return self._parse_binop(self._comparison, tok.AND)
+
+    def _disjunction(self) -> AST:
+        """
+        Parses a disjunction
+            conjunction : conjunction (and conjunction)*
+        """
+
+        return self._parse_binop(self._conjunction, tok.OR)
 
     def _string(self) -> AST:
         """
@@ -146,20 +151,10 @@ class Parser:
 
         token = self.curr
 
-        if token.type == tok.INT:
-            self._consume(tok.INT)
+        if token.type not in (tok.INT, tok.REAL, tok.BOOL, tok.STR):
+            raise SyntaxError(f"Invalid type definition: {token.value}")
 
-        elif token.type == tok.REAL:
-            self._consume(tok.REAL)
-
-        elif token.type == tok.BOOL:
-            self._consume(tok.BOOL)
-
-        elif token.type == tok.STR:
-            self._consume(tok.STR)
-
-        else:
-            raise SyntaxError(f"invalid type {token.type}")
+        self._consume(token.type)
 
         return VariableType(token)
 
@@ -170,7 +165,7 @@ class Parser:
         """
 
         self._consume(tok.SAY)
-        node = self._expression()
+        node = self._disjunction()
 
         return Say(node)
 
@@ -197,7 +192,7 @@ class Parser:
             to_assign = VariableDeclaration(to_assign, self._variable_type())
 
         self._consume(tok.ASSIGN)
-        assigned = self._expression()
+        assigned = self._disjunction()
 
         return AssignmentStatement(to_assign, token, assigned)
 
@@ -221,7 +216,7 @@ class Parser:
             stmt = self._empty()
 
         else:
-            stmt = self._expression()
+            stmt = self._disjunction()
 
         self._consume(tok.SEP)
 

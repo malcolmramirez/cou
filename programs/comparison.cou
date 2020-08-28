@@ -1,0 +1,41 @@
+less: int = -1;
+greater: real = 3;
+equal: int = -1;
+
+bool_eq1: bool = true;
+bool_eq2: bool = false;
+
+str_eq1: str = 'hello';
+str_eq2: str = 'hello';
+
+# Here is all true blocks
+
+tr: bool = greater > less;
+say tr;
+
+tr = less >= equal;
+say tr;
+
+tr = less == equal;
+say tr;
+
+say bool_eq1 != bool_eq2;
+say str_eq1 == str_eq2;
+
+say 1 < 2 || 2 - 4 * -1 < 1;
+
+# Here is all false blocks
+
+fa: bool = less > greater;
+say fa;
+
+fa = greater <= less;
+say fa;
+
+fa = less != equal;
+say fa;
+
+say bool_eq1 == bool_eq2;
+say str_eq1 != str_eq2;
+
+say 1 > 2 || 2 - 4 * -1 < 1;

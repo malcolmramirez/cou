@@ -37,13 +37,19 @@ SEP = ";"
 COLON = ":"
 
 SAY = "say"
+
 IF = "if"
+ELIF = "elif"
 ELSE = "else"
 
 EOF = "eof"
 
 
 def is_one_char_token(s: str) -> bool:
+    """
+    Returns true if s is a single character token
+    """
+
     single_char = {
         ADD, SUB, MUL, DIV,
         NOT,
@@ -58,6 +64,10 @@ def is_one_char_token(s: str) -> bool:
 
 
 def is_two_char_token(s: str) -> bool:
+    """
+    Returns true if s is a double character token
+    """
+
     double_char = {
         I_DIV,
         AND, OR,
@@ -68,13 +78,22 @@ def is_two_char_token(s: str) -> bool:
 
 
 def is_keyword(id: str) -> str:
+    """
+    Returns true if id is a designated keyword
+    """
+
     keywords = {
         INT, REAL, BOOL, STR,
-        SAY, IF, ELSE
+        IF, ELIF, ELSE,
+        SAY
     }
 
     return id in keywords
 
 
 def is_boolean(id: str) -> bool:
+    """
+    Returns true if id is a boolean
+    """
+
     return id == 'true' or id == 'false'

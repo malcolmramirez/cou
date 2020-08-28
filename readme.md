@@ -5,6 +5,7 @@ Cou is a simple programming language
 ## Grammar
 
 Cou currently has the following language constructs:
+this is outdated ill update it eventually
 
 ### number
 #### [0-9]+ | [0-9]* [\.] [0-9]+

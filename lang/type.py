@@ -38,9 +38,10 @@ def valid_operation(op_type: str, op1: Any, op2: Any = None):
             return False
 
     op_switch = {
-        tok.NUMBER : (tok.ADD, tok.SUB, tok.MUL, tok.DIV, tok.I_DIV),
-        tok.BOOL : (tok.AND, tok.OR, tok.NOT),
-        tok.STR : (tok.ADD)
+        tok.NUMBER : (tok.ADD, tok.SUB, tok.MUL, tok.DIV, tok.I_DIV, tok.EQ,
+                      tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS),
+        tok.BOOL   : (tok.AND, tok.OR, tok.NOT, tok.EQ, tok.NEQ),
+        tok.STR    : (tok.ADD, tok.EQ, tok.NEQ)
     }
 
     return op_type in op_switch[c_type_1]
