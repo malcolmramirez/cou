@@ -5,3 +5,6 @@ bang: str = '!';
 hello = hello + world + bang;
 
 say hello;
+
+hello + world + bang + '!';
+say hello;

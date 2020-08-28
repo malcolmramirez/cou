@@ -1,18 +1,18 @@
 
 # Will be tested when call stack + functions are implemented
 
-proc test: int(a: int, b: int) {
+#proc test: int(a: int, b: int) {
     number: int = 2;
 
     a: int = number;
     b: int = 10 * a + 10 * number %/ 4;
     c: int = a - - b;
 
-    ret c;
-}
+#    ret c;
+#}
 
-x = 11;
+x: int = 11;
 say x;
 
-x = test(x, 2);
+# x = test(x, 2);
 say x;

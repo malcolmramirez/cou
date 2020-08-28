@@ -1,0 +1,24 @@
+# This is used to test that expressions which don't belong to an assignment
+# statement are valid constructs within cou.
+
+x: int = 0;
+y: int = 1;
+
+z: real = 1.5;
+
+x + y + z;
+z - x;
+
+say x; say y; say z;
+
+z = z - x;
+say z;
+
+tr: bool = true;
+fr: bool = !tr;
+
+fr && tr || tr;
+
+say tr; say fr;
+
+;;;

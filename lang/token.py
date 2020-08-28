@@ -37,10 +37,8 @@ SEP = ";"
 COLON = ":"
 
 SAY = "say"
-TOI = "toi"
-TOR = "tor"
-TOB = "tob"
-TOS = "tos"
+IF = "if"
+ELSE = "else"
 
 EOF = "eof"
 
@@ -71,7 +69,8 @@ def is_two_char_token(s: str) -> bool:
 
 def is_keyword(id: str) -> str:
     keywords = {
-        INT, REAL, BOOL, STR, SAY
+        INT, REAL, BOOL, STR,
+        SAY, IF, ELSE
     }
 
     return id in keywords

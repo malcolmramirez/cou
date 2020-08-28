@@ -116,8 +116,6 @@ class Parser:
 
         return node
 
-
-
     def _string(self) -> AST:
         """
         Parses a string
@@ -206,19 +204,24 @@ class Parser:
     def _statement(self) -> AST:
         """
         Parses a statement
-            statement : [ empty | assignment_statement | say | operand ] sep
+            statement : [ empty | assignment_statement | say | expression ] sep
         """
 
         token = self.curr
+        next_char = self._tokenizer.peek()
 
-        if token.type == tok.ID:
+        if token.type == tok.ID and next_char in (tok.COLON, tok.ASSIGN):
+            # Either declaring a variable or assigning.
             stmt = self._assignment_statement()
 
         elif token.type == tok.SAY:
             stmt = self._say()
 
-        else:
+        elif token.type == tok.SEP:
             stmt = self._empty()
+
+        else:
+            stmt = self._expression()
 
         self._consume(tok.SEP)
 

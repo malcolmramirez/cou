@@ -14,10 +14,10 @@ def valid_type(cou_type: str, asn: Any):
     }
 
     c_type = type_switch[cou_type]
-    
+
     return (c_type == type(asn)) or (c_type == float and type(asn) == int)
 
-def valid_operation(op1: Any, op2: Any, op_type: str):
+def valid_operation(op_type: str, op1: Any, op2: Any = None):
     """
     Validates a cou type given an assignment
     """
@@ -30,10 +30,12 @@ def valid_operation(op1: Any, op2: Any, op_type: str):
     }
 
     c_type_1 = rev_type_switch[type(op1)]
-    c_type_2 = rev_type_switch[type(op2)]
 
-    if c_type_1 != c_type_2:
-        return False
+    if op2:
+        c_type_2 = rev_type_switch[type(op2)]
+
+        if c_type_1 != c_type_2:
+            return False
 
     op_switch = {
         tok.NUMBER : (tok.ADD, tok.SUB, tok.MUL, tok.DIV, tok.I_DIV),

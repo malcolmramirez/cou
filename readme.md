@@ -82,7 +82,7 @@ Represents an empty statement
 Represents an assignment statement, where a variable is assigned the result of san expression
 
 ### statement
-#### assignment_statement separator | empty separator
+#### assignment_statement separator | empty separator | expression
 
 Represents a general statement of code
 

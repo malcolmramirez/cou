@@ -156,6 +156,21 @@ class Tokenizer(object):
 
         return Token(t_type, decoded_string, self.line)
 
+    def peek(self) -> str:
+        """
+        Destructively searches through the stream to return the next non
+        whitespace or non comment char. Use carefully
+        """
+
+        next_char = self._next()
+
+        if not next_char or not next_char.isspace():
+            return next_char
+
+        self._skip()
+
+        return self.curr
+
     def produce(self) -> Token:
         """
         Returns next token in stream

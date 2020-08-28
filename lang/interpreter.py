@@ -152,19 +152,23 @@ class Interpreter(Visitor):
         Visits a unary operator (can be +/-)
         """
 
-        type = node.value
+        op_type = node.value
         operand = self.visit(node.child)
 
-        if isinstance(operand, bool) and type == tok.NOT:
+        if not valid_operation(op_type, operand):
+            raise SyntaxError(f"Invalid operator '{node.value}' for operand {operand}")
+
+        if op_type == tok.NOT:
             return not operand
 
-        if isinstance(operand, (int, float)) and type == tok.ADD:
+        if op_type == tok.ADD:
             return operand
 
-        if isinstance(operand, (int, float)) and type == tok.SUB:
+        if op_type == tok.SUB:
             return -operand
 
-        raise SyntaxError(f"Invalid operator '{node.value}' for operand {operand}")
+        raise SyntaxError(f"Invalid unary operator {op_type}")
+
 
     def _binary_operator(self, node: AST) -> Any:
         """
@@ -177,7 +181,7 @@ class Interpreter(Visitor):
         l = self.visit(node.left)
         r = self.visit(node.right)
 
-        if not valid_operation(l, r, op_type):
+        if not valid_operation(op_type, l, r):
             raise SyntaxError(
                 f"Invalid operation \'{op_type}\' between \'{l}\', \'{r}\'")
 
@@ -201,6 +205,24 @@ class Interpreter(Visitor):
 
         if op_type == tok.AND:
             return l and r
+
+        if op_type == tok.EQ:
+            return l == r
+
+        if op_type == tok.NEQ:
+            return l != r
+
+        if op_type == tok.GREATER:
+            return l > r
+
+        if op_type == tok.GEQ:
+            return l >= r
+
+        if op_type == tok.LESS:
+            return l < r
+
+        if op_type == tok.LEQ:
+            return l <= r
 
         raise SyntaxError(f"Invalid binary operator '{op_type.value}'")
 
@@ -244,7 +266,7 @@ class Interpreter(Visitor):
         if not valid_type(var_type, asn):
             raise SyntaxError(f"Cannot assign \'{asn}\' to \'{var_type}\'")
 
-        if var_type == tok.REAL and isinstance(asn, int):
+        if var_type == tok.REAL and type(asn) == int:
             asn = float(asn)
 
         self.global_memory[var_id] = asn
