@@ -151,7 +151,7 @@ class Parser:
 
         token = self.curr
 
-        if token.type not in (tok.INT, tok.REAL, tok.BOOL, tok.STR):
+        if token.type not in (tok.NUM, tok.BOOL, tok.STR):
             raise SyntaxError(f"Invalid type definition: {token.value}")
 
         self._consume(token.type)

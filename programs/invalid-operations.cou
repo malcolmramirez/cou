@@ -1,6 +1,6 @@
 
-i: int = 1;
-r: real = 1.0;
+i: num = 1;
+r: num = 1.0;
 b: bool = true;
 s: str = 'hello world';
 

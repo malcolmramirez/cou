@@ -4,8 +4,7 @@ NUMBER = "number"
 BOOLEAN = "boolean"
 
 ID = "id"
-INT = "int"
-REAL = "real"
+NUM = "num"
 BOOL = "bool"
 STR = "str"
 
@@ -83,7 +82,7 @@ def is_keyword(id: str) -> str:
     """
 
     keywords = {
-        INT, REAL, BOOL, STR,
+        NUM, BOOL, STR,
         IF, ELIF, ELSE,
         SAY
     }

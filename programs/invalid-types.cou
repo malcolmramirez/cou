@@ -1,8 +1,8 @@
 
 # s: str = 0;
-# i: int = 1.0;
-# r: real = false;
+# i: num = 1.0;
+# r: num = false;
 # b: bool = 'hello';
 
-# r: real = 1;
+# r: num = 1;
 # say r;

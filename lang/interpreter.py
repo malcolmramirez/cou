@@ -169,7 +169,6 @@ class Interpreter(Visitor):
 
         raise SyntaxError(f"Invalid unary operator {op_type}")
 
-
     def _binary_operator(self, node: AST) -> Any:
         """
         Visits a binary operator node on the AST (will recur until a number is
@@ -263,11 +262,9 @@ class Interpreter(Visitor):
         asn = self.visit(node.right)
 
         var_type = self.symbol_table.get(var_id).type_def
+        
         if not valid_type(var_type, asn):
             raise SyntaxError(f"Cannot assign \'{asn}\' to \'{var_type}\'")
-
-        if var_type == tok.REAL and type(asn) == int:
-            asn = float(asn)
 
         self.global_memory[var_id] = asn
 

@@ -1,6 +1,6 @@
-less: int = -1;
-greater: real = 3;
-equal: int = -1;
+less: num = -1;
+greater: num = 3;
+equal: num = -1;
 
 bool_eq1: bool = true;
 bool_eq2: bool = false;

@@ -5,7 +5,7 @@
 
 
 
-number: int = 5;
+number: nbr = 5;
 
 a: int = number;
 # A comment to test commenting

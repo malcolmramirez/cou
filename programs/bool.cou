@@ -20,8 +20,8 @@ b = !a;
 complex: bool = !!(!(a && b) || (!a && !!b)) || (!b || !a) && a;
 say complex;
 
-i1: int = 2;
-i2: int = 3;
+i1: num = 2;
+i2: num = 3;
 
 # complex = (i1 + i2) && (i1 - 2);
 # say complex;
