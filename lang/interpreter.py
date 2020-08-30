@@ -1,13 +1,12 @@
 
 import lang.token as tok
+import lang.validation as validation
 
 from typing import Any
 
 from lang.tokenizer import Token, Tokenizer
 from lang.parser import Parser
 from lang.ast import AST
-from lang.symbol import SymbolTable, VariableSymbol
-from lang.type import valid_type, valid_operation
 
 # Interpreter
 
@@ -33,82 +32,6 @@ class Visitor(object):
         return
 
 
-class SymbolTableBuilder(Visitor):
-    """
-    Builds symbol table for interpreter
-    """
-
-    def __init__(self, tree: AST):
-        self.tree = tree
-        self.table = SymbolTable()
-
-    def _variable(self, node: AST) -> None:
-        """
-        Visits a variable
-        """
-
-        var_name = node.value
-
-        if not self.table.exists(var_name):
-            raise NameError(
-                f"Variable '{var_name}' referenced before declaration")
-
-    def _variable_declaration(self, node: AST) -> None:
-        """
-        Visits a variable_declaration
-        """
-
-        var_name = node.value
-        var_type = node.variable_type.value
-
-        if self.table.exists(var_name):
-            raise NameError(f"Variable '{var_name}' declared more than once")
-
-        var_sym = VariableSymbol(var_name, var_type)
-
-        self.table.put(var_sym)
-
-    def _unary_operator(self, node: AST) -> None:
-        """
-        Visits a unary operator
-        """
-
-        self.visit(node.child)
-
-    def _binary_operator(self, node: AST) -> None:
-        """
-        Visits a binary operator
-        """
-
-        self.visit(node.left)
-        self.visit(node.right)
-
-    def _assignment_statement(self, node: AST) -> None:
-        """
-        Visits an assignment statement
-        """
-
-        self.visit(node.left)
-        self.visit(node.right)
-
-    def _program(self, node: AST) -> None:
-        """
-        Visits a program
-        """
-
-        for statement in node.statements:
-            self.visit(statement)
-
-    def construct(self) -> SymbolTable:
-        """
-        Constructs a symbol table given an ast
-        """
-
-        self.visit(self.tree)
-
-        return self.table
-
-
 class Interpreter(Visitor):
     """
     Evaluates expressions from the parser
@@ -119,11 +42,7 @@ class Interpreter(Visitor):
         Initializes interpreter with a parser, used to eval. expressions
         """
 
-        parser = Parser(Tokenizer(text))
-
-        self.tree = parser.parse()
-        self.symbol_table = SymbolTableBuilder(self.tree).construct()
-
+        self.parser = Parser(Tokenizer(text))
         self.global_memory = {}
 
     def _number(self, node: AST) -> int:
@@ -138,7 +57,7 @@ class Interpreter(Visitor):
         Visits a boolean node (just needs to return the value)
         """
 
-        return node.value
+        return node.value == 'true'
 
     def _string(self, node: AST) -> str:
         """
@@ -153,10 +72,11 @@ class Interpreter(Visitor):
         """
 
         op_type = node.value
+        token = node.token
+
         operand = self.visit(node.child)
 
-        if not valid_operation(op_type, operand):
-            raise SyntaxError(f"Invalid operator '{node.value}' for operand {operand}")
+        validation.validate_operation(op_type, (token.line, token.col), operand)
 
         if op_type == tok.NOT:
             return not operand
@@ -167,7 +87,8 @@ class Interpreter(Visitor):
         if op_type == tok.SUB:
             return -operand
 
-        raise SyntaxError(f"Invalid unary operator {op_type}")
+        token = node.token
+        raise SyntaxError(f"Invalid unary operator {op_type} <line:{token.line},col:{token.col}>")
 
     def _binary_operator(self, node: AST) -> Any:
         """
@@ -180,9 +101,8 @@ class Interpreter(Visitor):
         l = self.visit(node.left)
         r = self.visit(node.right)
 
-        if not valid_operation(op_type, l, r):
-            raise SyntaxError(
-                f"Invalid operation \'{op_type}\' between \'{l}\', \'{r}\'")
+        token = node.token
+        validation.validate_operation(op_type, (token.line, token.col), l, r)
 
         if op_type == tok.ADD:
             return l + r
@@ -223,7 +143,7 @@ class Interpreter(Visitor):
         if op_type == tok.LEQ:
             return l <= r
 
-        raise SyntaxError(f"Invalid binary operator '{op_type.value}'")
+        raise SyntaxError(f"Invalid binary operator '{op_type}', <line:{token.line},col:{token.col}>")
 
     def _variable(self, node: AST) -> AST:
         """
@@ -259,12 +179,11 @@ class Interpreter(Visitor):
         """
 
         var_id = node.left.value
+        var_type = self.parser.symtab[var_id]
         asn = self.visit(node.right)
 
-        var_type = self.symbol_table.get(var_id).type_def
-        
-        if not valid_type(var_type, asn):
-            raise SyntaxError(f"Cannot assign \'{asn}\' to \'{var_type}\'")
+        token = node.token
+        validation.validate_type(var_type, (token.line, token.col), asn)
 
         self.global_memory[var_id] = asn
 
@@ -281,4 +200,4 @@ class Interpreter(Visitor):
         Interprets a line of text.
         """
 
-        self.visit(self.tree)
+        self.visit(self.parser.parse())

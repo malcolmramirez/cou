@@ -1,4 +1,5 @@
 from lang.tokenizer import Token
+import lang.token as tok
 
 # Abstract syntax tree
 
@@ -19,6 +20,7 @@ class Number(AST):
 
     def __init__(self, token: Token):
         self.value = token.value
+        self.token = token
 
     def name(self) -> str:
         return "number"
@@ -31,6 +33,7 @@ class Boolean(AST):
 
     def __init__(self, token: Token):
         self.value = token.value
+        self.token = token
 
     def name(self) -> str:
         return "boolean"
@@ -43,6 +46,7 @@ class String(AST):
 
     def __init__(self, token: Token):
         self.value = token.value
+        self.token = token
 
     def name(self) -> str:
         return "string"
@@ -55,6 +59,7 @@ class UnaryOperator(AST):
 
     def __init__(self, token: Token, child: AST):
         self.value = token.type
+        self.token = token
         self.child = child
 
     def name(self) -> str:
@@ -69,6 +74,7 @@ class BinaryOperator(AST):
     def __init__(self, left: AST, token: Token, right: AST):
         self.left = left
         self.value = token.type
+        self.token = token
         self.right = right
 
     def name(self) -> str:
@@ -82,7 +88,7 @@ class Variable(AST):
 
     def __init__(self, token: Token):
         self.value = token.value
-
+        self.token = token
 
     def name(self) -> str:
         return "variable"
@@ -92,6 +98,7 @@ class VariableType(AST):
 
     def __init__(self, token: Token):
         self.value = token.value
+        self.token = token
 
     def name(self) -> str:
         return "variable_type"
@@ -105,6 +112,7 @@ class AssignmentStatement(AST):
     def __init__(self, left: AST, token: Token, right: AST):
         self.left = left
         self.value = token.value
+        self.token = token
         self.right = right
 
     def name(self) -> str:
@@ -128,7 +136,7 @@ class VariableDeclaration(AST):
     def __init__(self, variable: AST, variable_type: AST):
         self.variable = variable
         self.value = variable.value
-        self.variable_type = variable_type
+        self.token = variable.token
 
     def name(self) -> str:
         return "variable_declaration"
@@ -141,6 +149,7 @@ class Say(AST):
 
     def __init__(self, to_say: AST):
         self.value = to_say
+        self.token = to_say.token
 
     def name(self) -> str:
         return "say"

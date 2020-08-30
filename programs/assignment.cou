@@ -5,22 +5,22 @@
 
 
 
-number: nbr = 5;
+number: num = 5;
 
-a: int = number;
+a: num = number;
 # A comment to test commenting
-b: real = 10 * a + 10 * number / 4; # Here is another
-c: real = a - - b; # cool comments
+b: num = 10 * a + 10 * number / 4; # Here is another
+c: num = a - - b; # cool comments
 # Test1
         # Test2
-_a_cool_tho: real = c - b - 0.5;;
+_a_cool_tho: num = c - b - 0.5;;
 
 ;;; # To test empty
 
 # Here is the last comment i am testing # Whoa
 
-x: int = 11;
-say1: real = c - 18 - b + 0.25;
+x: num = 11;
+say1: num = c - 18 - b + 0.25;
 
 say say1;
 say c - 18 - b + 0.25;

@@ -18,6 +18,7 @@ class Parser:
 
         self._tokenizer = tokenizer
         self.curr = self._tokenizer.produce()
+        self.symtab = {} # Stores types for variables (used for validation)
 
     def _consume(self, type) -> None:
         """
@@ -26,7 +27,7 @@ class Parser:
         """
 
         if self.curr.type != type:
-            raise SyntaxError(f"Expected '{type}'")
+            raise SyntaxError(f"Expected '{type}' <line:{self.curr.line},col:{self.curr.col}>")
 
         self.curr = self._tokenizer.produce()
 
@@ -39,7 +40,10 @@ class Parser:
         operand_token = self.curr
         node = None
 
-        if operand_token.type == tok.NUMBER:
+        if operand_token.type == tok.ID:
+            node = self._variable()
+
+        elif operand_token.type == tok.NUMBER:
             self._consume(tok.NUMBER)
             node = Number(operand_token)
 
@@ -47,13 +51,9 @@ class Parser:
             self._consume(tok.STRING)
             node = String(operand_token)
 
-        elif operand_token.type == tok.BOOLEAN:
-            self._consume(tok.BOOLEAN)
+        elif operand_token.type in (tok.BOOL_T, tok.BOOL_F):
+            self._consume(operand_token.type)
             node = Boolean(operand_token)
-
-        elif operand_token.type == tok.ID:
-            self._consume(tok.ID)
-            node = Variable(operand_token)
 
         elif operand_token.type in (tok.ADD, tok.SUB, tok.NOT):
             self._consume(operand_token.type)
@@ -139,6 +139,11 @@ class Parser:
         """
 
         token = self.curr
+        var_name = token.value
+
+        if var_name not in self.symtab:
+            raise SyntaxError(f"Variable '{var_name}' referenced before declaration <line:{token.line},col:{token.col}>")
+
         self._consume(tok.ID)
 
         return Variable(token)
@@ -146,17 +151,40 @@ class Parser:
     def _variable_type(self) -> AST:
         """
         Parses a type
-            type : int | real | bool | str
+            type : num | bool | str
         """
 
         token = self.curr
 
         if token.type not in (tok.NUM, tok.BOOL, tok.STR):
-            raise SyntaxError(f"Invalid type definition: {token.value}")
+            raise SyntaxError(f"Invalid type definition: {token.type} <line:{token.line},col:{token.col}>")
 
         self._consume(token.type)
 
         return VariableType(token)
+
+    def _variable_declaration(self) -> AST:
+        """
+        Parses a variable declaration
+        """
+
+        token = self.curr
+        var_name = token.value
+
+        if var_name in self.symtab:
+            raise SyntaxError(f"Variable '{var_name}' declared more than once <line:{token.line},col:{token.col}>")
+
+        variable = Variable(token)
+
+        self._consume(tok.ID)
+        self._consume(tok.COLON)
+
+        var_type = self._variable_type()
+
+        self.symtab[var_name] = var_type.value
+
+        return VariableDeclaration(variable, var_type)
+
 
     def _say(self) -> AST:
         """
@@ -184,17 +212,20 @@ class Parser:
                             | variable_declaration assign expression
         """
 
-        to_assign = self._variable()
         token = self.curr
+        var_name = token.value
+        next_char = self._tokenizer.peek()
 
-        if token.type == tok.COLON:
-            self._consume(tok.COLON)
-            to_assign = VariableDeclaration(to_assign, self._variable_type())
+        if next_char == tok.COLON:
+            to_assign = self._variable_declaration()
 
+        else:
+            to_assign = self._variable()
+
+        var_type = self.symtab[var_name]
         self._consume(tok.ASSIGN)
-        assigned = self._disjunction()
 
-        return AssignmentStatement(to_assign, token, assigned)
+        return AssignmentStatement(to_assign, token, self._disjunction())
 
     def _statement(self) -> AST:
         """

@@ -1,7 +1,12 @@
 
+from lang.tokenizer import Token
+
 STRING = "string"
 NUMBER = "number"
 BOOLEAN = "boolean"
+
+BOOL_T = "true"
+BOOL_F = "false"
 
 ID = "id"
 NUM = "num"
@@ -43,56 +48,32 @@ ELSE = "else"
 
 EOF = "eof"
 
+reserved_single_char = {
+    ADD, SUB, MUL, DIV,
+    NOT,
+    GREATER, LESS,
+    L_PAREN, R_PAREN,
+    L_BRACE, R_BRACE,
+    ASSIGN, COLON,
+    SEP
+}
 
-def is_one_char_token(s: str) -> bool:
-    """
-    Returns true if s is a single character token
-    """
-
-    single_char = {
-        ADD, SUB, MUL, DIV,
-        NOT,
-        GREATER, LESS,
-        L_PAREN, R_PAREN,
-        L_BRACE, R_BRACE,
-        ASSIGN, COLON,
-        SEP
-    }
-
-    return s in single_char
+reserved_double_char = {
+    I_DIV,
+    AND, OR,
+    EQ, NEQ, GEQ, LEQ
+}
 
 
-def is_two_char_token(s: str) -> bool:
-    """
-    Returns true if s is a double character token
-    """
-
-    double_char = {
-        I_DIV,
-        AND, OR,
-        EQ, NEQ, GEQ, LEQ
-    }
-
-    return s in double_char
-
-
-def is_keyword(id: str) -> str:
-    """
-    Returns true if id is a designated keyword
-    """
-
-    keywords = {
-        NUM, BOOL, STR,
-        IF, ELIF, ELSE,
+def build_keywords() -> dict:
+    return {
+        NUM,
+        STR,
+        BOOL,
+        BOOL_T,
+        BOOL_F,
+        IF,
+        ELIF,
+        ELSE,
         SAY
     }
-
-    return id in keywords
-
-
-def is_boolean(id: str) -> bool:
-    """
-    Returns true if id is a boolean
-    """
-
-    return id == 'true' or id == 'false'
