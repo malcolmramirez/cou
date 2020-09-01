@@ -114,6 +114,13 @@ class Interpreter(Visitor):
         validation.validate_operation(op_type, token, l, r)
 
         if op_type == tok.ADD:
+            
+            if type(l) == str:
+                r = str(r)
+
+            elif type(r) == str:
+                l = str(l)
+
             return l + r
 
         if op_type == tok.SUB:

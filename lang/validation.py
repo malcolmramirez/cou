@@ -58,7 +58,12 @@ def validate_operation(op_type: str, token: Token, op1: Any, op2: Any = None):
     c_type_1 = _type_switch[type(op1)]
 
     if op2:
+
         c_type_2 = _type_switch[type(op2)]
+
+        if (c_type_1 == tok.STR or c_type_2 == tok.STR) and op_type == tok.ADD:
+            return # Here an automatic string conversion will happen, so this is ok
+
         if c_type_1 != c_type_2:
             error(f"Invalid operation {op_type} between types '{c_type_1}' and '{c_type_2}'", token)
 

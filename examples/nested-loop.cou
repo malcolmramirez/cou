@@ -1,0 +1,23 @@
+
+proc fmt: str(i: num, j: num, k: num) {
+    return '(' + i + ',' + j + ',' + k + ')';
+}
+
+i: num = 0;
+
+as (i < 10) {
+
+    j: num = 0;
+    as (j < 15) {
+
+        k: num = 0;
+        as (k < 20) {
+            say fmt(i, j, k);
+            k = k + 1;
+        }
+
+        j = j + 1;
+    }
+
+    i = i + 1;
+}
