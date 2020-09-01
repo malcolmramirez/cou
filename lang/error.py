@@ -18,6 +18,4 @@ def error(msg: str, pos = None):
         line = pos.line
         col = pos.col
 
-
-
     raise SyntaxError(f"{msg}, <line:{line},col:{col}>")

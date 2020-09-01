@@ -268,6 +268,24 @@ class Parser:
 
         return Conditions(conditions)
 
+    def _as(self) -> AST:
+        """
+        Parses an 'as' block, ie, a loop
+        """
+
+        token = self.curr
+        scope_level = self.symtab.sc_level + 1
+
+        self._consume(tok.AS)
+
+        self._consume(tok.L_PAREN)
+        condition = self._disjunction()
+        self._consume(tok.R_PAREN)
+
+        self.symtab = SymbolTable(scope_level, "as", self.symtab)
+
+        return As(token, condition, self._block())
+
     def _process_declaration(self) -> AST:
         """
         Parses a variable declaration
@@ -366,6 +384,9 @@ class Parser:
 
         self._consume(tok.RETURN)
 
+        if (self.curr.value == tok.SEP):
+            return Return(Empty())
+
         return Return(self._disjunction())
 
     def _say(self) -> AST:
@@ -420,6 +441,9 @@ class Parser:
 
         elif token.type == tok.IF:
             return self._condition()
+
+        elif token.type == tok.AS:
+            return self._as()
 
         if token.type == tok.ID and next_char == tok.L_PAREN:
             # Call for a process

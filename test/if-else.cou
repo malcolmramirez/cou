@@ -30,6 +30,7 @@ if (integer < 0) {
 
 } else {
     say 'integer is greater than 1';
+    return;
 }
 
 integer = 0;

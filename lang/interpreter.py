@@ -1,5 +1,5 @@
 
-from typing import Any
+from typing import Any, List
 
 import lang.token as tok
 import lang.validation as validation
@@ -216,6 +216,23 @@ class Interpreter(Visitor):
                 self.visit(cond.block)
                 return
 
+    def _as(self, node: AST) -> None:
+        """
+        Interprets an as loop
+        """
+
+        eval = self.visit(node.condition)
+        validation.validate_condition(node.token, eval)
+
+        while eval:
+            self.visit(node.block)
+
+            eval = self.visit(node.condition)
+            validation.validate_condition(node.token, eval)
+
+
+
+
     def _return(self, node: AST) -> None:
         """
         Interprets a return statement
@@ -249,17 +266,24 @@ class Interpreter(Visitor):
 
         return ret_val
 
+    def _execute_statements(self, statements: List[AST]) -> None:
+        """
+        Executes a list of statements until a return or end of block is hit
+        """
+
+        record = self.stack.peek()
+
+        for statement in statements:
+            self.visit(statement)
+            if record.returned:
+                return  # Return when we hit a ret statement
+
     def _block(self, node: AST) -> None:
         """
         Interprets a block of code
         """
 
-        record = self.stack.peek()
-
-        for statement in node.statements:
-            self.visit(statement)
-            if record.returned:
-                return  # Return when we hit a ret statement
+        self._execute_statements(node.statements)
 
     def _program(self, node: AST) -> None:
         """
@@ -269,8 +293,7 @@ class Interpreter(Visitor):
         record = ActivationRecord("main", 1)
         self.stack.push(record)
 
-        for statement in node.statements:
-            self.visit(statement)
+        self._execute_statements(node.statements)
 
         self.stack.pop()
 

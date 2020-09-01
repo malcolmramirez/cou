@@ -1,0 +1,19 @@
+i: num = 1;
+
+as (i < 101) {
+
+    if (i % 15 == 0) {
+        say 'fizzbuzz';
+
+    } elif (i % 3 == 0) {
+        say 'fizz';
+
+    } elif (i % 5 == 0) {
+        say 'buzz';
+
+    } else {
+        say i;
+    }
+
+    i = i + 1;
+}

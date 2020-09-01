@@ -169,6 +169,9 @@ class Empty(AST):
     Represents an empty statement in the AST
     """
 
+    def __init__(self):
+        self.value = None
+
     def name(self) -> str:
         return "empty"
 
@@ -250,6 +253,22 @@ class ProcessDeclaration(AST):
         return f"proc {self.token.value}: {self.type_def}({param_fmt})"
 
 
+class ProcessCall(AST):
+
+    def __init__(self, token: Token, args: List[AST], proc_sym: Symbol):
+        self.value = token.value
+        self.token = token
+        self.args = args
+        self.proc_sym = proc_sym
+
+    def name(self) -> str:
+        return "process_call"
+
+    def __str__(self) -> str:
+        args_fmt = str(self.args)
+        return f"{self.value}({args_fmt[1 : len(args_fmt) - 1]})"
+
+
 class Process(AST):
     """
     Represents a process
@@ -272,6 +291,7 @@ class Process(AST):
 
         return f"{self.declr}{{ \n {statement_fmt}\n}}"
 
+
 class Condition(AST):
 
     def __init__(self, condition: AST, block: AST):
@@ -285,6 +305,7 @@ class Condition(AST):
     def __str__(self) -> str:
         return f"cond {self.condition} \n {self.block}"
 
+
 class Conditions(AST):
     """
     Represents a block of conditions
@@ -297,40 +318,24 @@ class Conditions(AST):
         return "conditions"
 
     def __str__(self) -> str:
-        return str(conditions)
+        return str(self.conditions)
 
 
-class Block(AST):
+class As(AST):
+    """
+    Represents an as loop
+    """
 
-    def __init__(self, statements: List[AST]):
-        self.statements = statements
-
-    def name(self) -> str:
-        return "block"
-
-    def __str__(self) -> str:
-        statement_fmt = ''
-        if self.statements:
-            statement_fmt = str(self.statements).replace(',', '\n')
-            statement_fmt = statement_fmt[1: len(statement_fmt) - 1]
-
-        return statement_fmt
-
-
-class ProcessCall(AST):
-
-    def __init__(self, token: Token, args: List[AST], proc_sym: Symbol):
-        self.value = token.value
+    def __init__(self, token: Token, condition: AST, block: AST):
         self.token = token
-        self.args = args
-        self.proc_sym = proc_sym
+        self.condition = condition
+        self.block = block
 
     def name(self) -> str:
-        return "process_call"
+        return "as"
 
     def __str__(self) -> str:
-        args_fmt = str(self.args)
-        return f"{self.value}({args_fmt[1 : len(args_fmt) - 1]})"
+        return f"as {self.condition} {self.block}"
 
 
 class Block(AST):

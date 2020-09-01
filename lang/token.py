@@ -48,6 +48,7 @@ COMMA = ","
 SAY = "say"
 PROC = "proc"
 RETURN = "return"
+AS = "as"
 
 IF = "if"
 ELIF = "elif"
@@ -75,7 +76,7 @@ reserved_double_char = {
 def build_keywords() -> dict:
     return {
         NUM, STR, BOOL, NIL,
-        PROC, RETURN,
+        PROC, RETURN, AS,
         BOOL_T, BOOL_F, NOTHING,
         IF, ELIF, ELSE,
         SAY
