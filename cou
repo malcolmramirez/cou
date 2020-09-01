@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python3 "cou.py" $1

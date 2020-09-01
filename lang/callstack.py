@@ -1,24 +1,17 @@
 from typing import Any
 from enum import Enum
 
-class FrameTypes(Enum):
-
-    PROGRAM = "program",
-    PROCESS = "process",
-    CONDITIONAL = "conditional"
-
-
 class StackFrame(object):
     """
     Represents a frame on the call stack
     """
 
-    def __init__(self, name: str, frame_type: str, sc_level: int, memory = None):
+    def __init__(self, name: str, sc_level: int, parent = None, memory = None):
 
         self.name = name
-        self.frame_type = frame_type
         self.sc_level = sc_level
 
+        self.parent = parent
         self.memory = memory if memory else {}
 
         self.ret_val = None
@@ -28,10 +21,13 @@ class StackFrame(object):
         self.memory[var_name] = value
 
     def __getitem__(self, var_name: str):
-        return self.memory[var_name]
+        if var_name in self.memory:
+            return self.memory[var_name]
+
+        return self.parent[var_name]
 
     def __str__(self) -> str:
-        s = f"{self.sc_level}:{self.name}:{self.frame_type}"
+        s = f"{self.sc_level}:{self.name}:{self.frame_type.value}"
         for key in self.memory:
             s += f"\n{key} : {self.memory[key]}"
 

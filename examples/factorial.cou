@@ -1,0 +1,9 @@
+proc factorial: num(curr: num) {
+    if (curr == 1) {
+        return curr;
+    }
+
+    return curr * factorial(curr - 1);
+}
+
+say factorial(10);

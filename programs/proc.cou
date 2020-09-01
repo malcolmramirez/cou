@@ -9,7 +9,7 @@ proc test: num(a: num, b: num) {
     c: num = a - - b;
 
     return c;
-};
+}
 
 x: num = 11;
 b: bool = test(2, x) + 2 > 23;

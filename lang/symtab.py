@@ -47,10 +47,14 @@ class ProcessSymbol(Symbol):
     Represents a symbol for a process
     """
 
-    def __init__(self, name: str, type_def: str, params: List[VariableSymbol] = None):
+    def __init__(self, name: str, type_def: str, sc_level: int, params: List[VariableSymbol] = None):
+
         super().__init__(name, type_def)
+
         self.params = params if params else []
         self.is_proc = True
+
+        self.sc_level = sc_level
         self.process = None
 
     def __str__(self) -> str:

@@ -22,6 +22,15 @@ _op_switch = {
 }
 
 
+def validate_condition(token: Token, asn: Any):
+    """
+    Validates a cou type given given a function return type
+    """
+
+    asn_c_type = _type_switch[type(asn)]
+    if tok.BOOL != asn_c_type:
+        error(f"Condition cannot be \'{asn_c_type}\', must evaluate to 'bool'", token)
+
 def validate_return(cou_type: str, token: Token, asn: Any):
     """
     Validates a cou type given given a function return type

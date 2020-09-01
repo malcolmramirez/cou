@@ -27,7 +27,7 @@ class Parser:
         # Stores types for variables (used for validation)
         self.symtab = SymbolTable(1, "global", None)
 
-    def _consume(self, type) -> None:
+    def _consume(self, type: str) -> None:
         """
         Consumes a token of the specified type, raising an error if the current
         token in the stream is not that type.
@@ -203,6 +203,50 @@ class Parser:
 
         return VariableDeclaration(variable, var_type)
 
+    def _assignment_statement(self) -> AST:
+        """
+        Parses an assignment statement
+            statement : variable assign expression
+                            | variable_declaration assign expression
+        """
+
+        token = self.curr
+        var_name = token.value
+
+        next_char = self._tokenizer.peek()
+
+        if next_char == tok.COLON:
+            to_assign = self._variable_declaration()
+
+        else:
+            to_assign = self._variable()
+
+        var_type = self.symtab.get(var_name)
+        self._consume(tok.ASSIGN)
+
+        return AssignmentStatement(to_assign, token, self._disjunction())
+
+    def _condition(self) -> AST:
+        """
+        Parses a conditional block
+        """
+
+        token = self.curr
+
+        self._consume(tok.IF)
+
+        self._consume(tok.L_PAREN)
+        condition = self._disjunction()
+        self._consume(tok.R_PAREN)
+
+        # Shifting the scope of the symbol table to the conditional level
+        prev_tab = self.symtab
+        self.symtab = SymbolTable(prev_tab.sc_level + 1, "if", prev_tab)
+
+        block = self._block()
+
+        return ConditionalIf(condition, block)
+
     def _process_declaration(self) -> AST:
         """
         Parses a variable declaration
@@ -233,7 +277,7 @@ class Parser:
             self._consume(tok.COMMA)
             params.append(self._variable_declaration())
 
-        sym = ProcessSymbol(proc_name, proc_type.value, params)
+        sym = ProcessSymbol(proc_name, proc_type.value, self.symtab.sc_level, params)
         prev_tab.put(sym)
 
         self._consume(tok.R_PAREN)
@@ -295,6 +339,15 @@ class Parser:
 
         return ProcessCall(token, args, st_entry)
 
+    def _return(self) -> AST:
+        """
+        Parses a return statement
+        """
+
+        self._consume(tok.RETURN)
+
+        return Return(self._disjunction())
+
     def _say(self) -> AST:
         """
         Parses a say function
@@ -313,38 +366,6 @@ class Parser:
         """
 
         return Empty()
-
-    def _assignment_statement(self) -> AST:
-        """
-        Parses an assignment statement
-            statement : variable assign expression
-                            | variable_declaration assign expression
-        """
-
-        token = self.curr
-        var_name = token.value
-
-        next_char = self._tokenizer.peek()
-
-        if next_char == tok.COLON:
-            to_assign = self._variable_declaration()
-
-        else:
-            to_assign = self._variable()
-
-        var_type = self.symtab.get(var_name)
-        self._consume(tok.ASSIGN)
-
-        return AssignmentStatement(to_assign, token, self._disjunction())
-
-    def _return(self) -> AST:
-        """
-        Parses a return statement
-        """
-
-        self._consume(tok.RETURN)
-
-        return Return(self._disjunction())
 
     def _block(self) -> AST:
         """
@@ -375,9 +396,12 @@ class Parser:
         next_char = self._tokenizer.peek()
 
         if token.type == tok.PROC:
-            stmt = self._process()
+            return self._process()
 
-        elif token.type == tok.ID and next_char == tok.L_PAREN:
+        elif token.type == tok.IF:
+            return self._condition()
+
+        if token.type == tok.ID and next_char == tok.L_PAREN:
             # Call for a process
             stmt = self._process_call()
 

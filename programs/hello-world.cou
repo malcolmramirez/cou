@@ -1,4 +1,4 @@
 
-s: str = '\'hello world\'\n - col dude';
+s: str = '\'i lvoe u nicole\'\n - malclm';
 
 say s;

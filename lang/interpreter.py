@@ -8,7 +8,7 @@ from lang.error import error
 from lang.tokenizer import Token, Tokenizer
 from lang.parser import Parser
 from lang.ast import AST
-from lang.callstack import CallStack, StackFrame, FrameTypes
+from lang.callstack import CallStack, StackFrame
 
 # Interpreter
 
@@ -200,6 +200,22 @@ class Interpreter(Visitor):
         fr = self.stack.peek()
         fr[var_id] = asn
 
+    def _conditional_if(self, node: AST) -> None:
+        """
+        Interprets a conditional if
+        """
+
+        token = node.token
+        cond_result = self.visit(node.condition)
+
+        validation.validate_condition(token, cond_result)
+
+        fr = StackFrame("if", 2, self.stack.peek())
+
+        if cond_result:
+            self.visit(node.block)
+
+
     def _return(self, node: AST) -> None:
         """
         Interprets a return statement
@@ -217,18 +233,18 @@ class Interpreter(Visitor):
         """
 
         proc_name = node.value
-        sym = node.proc_sym
+        proc_sym = node.proc_sym
 
-        fr = StackFrame(proc_name, FrameTypes.PROCESS, 2)
+        fr = StackFrame(proc_name, proc_sym.sc_level, self.stack.peek())
 
-        for param, arg in zip(sym.params, node.args):
+        for param, arg in zip(proc_sym.params, node.args):
             fr[param.value] = self.visit(arg)
 
         self.stack.push(fr)
-        self.visit(sym.process.block)
+        self.visit(proc_sym.process.block)
 
         ret_val = self.stack.pop()
-        validation.validate_return(sym.type_def, node.token, ret_val)
+        validation.validate_return(proc_sym.type_def, node.token, ret_val)
 
         return ret_val
 
@@ -248,7 +264,7 @@ class Interpreter(Visitor):
         Interprets a program
         """
 
-        fr = StackFrame("main", FrameTypes.PROGRAM, 1)
+        fr = StackFrame("main", 1)
         self.stack.push(fr)
 
         for statement in node.statements:
