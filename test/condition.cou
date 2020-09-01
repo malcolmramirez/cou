@@ -1,0 +1,45 @@
+
+i: num = 1;
+
+if (i == 0) {
+    say 'i is zero';
+
+} elif (i == 2) {
+    say 'i is two';
+
+} elif (i == 1) {
+    say 'i is one';
+    i = 3;
+
+} else {
+    say 'i is not one or two';
+}
+
+if (i == 1) {
+    say 'i is one';
+
+} elif (i == 0) {
+    say 'i is zero';
+
+} elif (i == 2) {
+    say 'i is two';
+
+} else {
+    say 'i is not one or two';
+    i = 1;
+}
+
+if (i == 1) {
+    say 'i is one';
+    i = 3;
+
+} elif (i == 2) {
+    say 'i is two';
+
+} else {
+    say 'i is not one or two';
+}
+
+if (i == 3) {
+    say 'i is three';
+}
