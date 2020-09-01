@@ -1,6 +1,8 @@
 import codecs
 import lang.token as tok
 
+from lang.error import error
+
 class Token:
     """
     Represents a single token, with a type and value
@@ -100,20 +102,22 @@ class Tokenizer(object):
         """
 
         t_type = tok.NUMBER
+        col = self.col
+
         num = ''
 
         while self.curr and self.curr.isdigit():
             num += self._increment()
 
         if self.curr != ".":
-            return Token(t_type, int(num), self.line, self.col)
+            return Token(t_type, int(num), self.line, col)
 
         num += self._increment()
 
         while self.curr and self.curr.isdigit():
             num += self._increment()
 
-        return Token(t_type, float(num), self.line, self.col)
+        return Token(t_type, float(num), self.line, col)
 
     def _name_token(self) -> Token:
         """
@@ -123,15 +127,17 @@ class Tokenizer(object):
         """
 
         t_type = tok.ID
+        col = self.col
+
         id = ''
 
         while self.curr and (self.curr.isalnum() or self.curr == "_"):
             id += self._increment()
 
         if id in self.keywords:
-            return Token(id, id, self.line, self.col)
+            return Token(id, id, self.line, col)
 
-        return Token(tok.ID, id, self.line, self.col)
+        return Token(tok.ID, id, self.line, col)
 
     def _string_token(self) -> Token:
         """
@@ -139,6 +145,8 @@ class Tokenizer(object):
         """
 
         t_type = tok.STRING
+        col = self.col
+
         string = ''
 
         prev = self._increment()
@@ -153,7 +161,7 @@ class Tokenizer(object):
         decoded_string = codecs.escape_decode(
             bytes(string, "utf-8"))[0].decode("utf-8")
 
-        return Token(t_type, decoded_string, self.line, self.col)
+        return Token(t_type, decoded_string, self.line, col)
 
     def peek(self) -> str:
         """
@@ -163,7 +171,7 @@ class Tokenizer(object):
 
         next_char = self._next()
 
-        if not next_char or not next_char.isspace():
+        if (next_char and not next_char.isspace()) and (self.curr and self.curr.isspace()):
             return next_char
 
         self._skip()
@@ -178,9 +186,10 @@ class Tokenizer(object):
         self._skip()
 
         char = self.curr
+        col = self.col
 
         if not char:
-            return Token(tok.EOF, None, self.line, self.col)
+            return Token(tok.EOF, None, self.line, col)
 
         elif char == '\'':
             return self._string_token()
@@ -199,9 +208,9 @@ class Tokenizer(object):
 
         elif char not in tok.reserved_single_char:
             # If there is not a one char identifier at this point, bad char.
-            raise SyntaxError(f"Invalid character: {char} <line:{self.line},col:{self.col}>")
+            error(f"Invalid character: {char}", (self.line, col))
 
-        token = Token(char, char, self.line, self.col)
         self._increment()
+        token = Token(char, char, self.line, col)
 
         return token

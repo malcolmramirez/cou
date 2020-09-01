@@ -1,0 +1,7 @@
+proc test: nil(a: num, b: num) {};
+proc test2: nil() {};
+# test(1);
+# test(1, 2, 3);
+# test2(1, 2);
+
+x: nil = nothing;

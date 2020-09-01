@@ -1,0 +1,3 @@
+n: nil = nothing;
+
+say n == nothing;

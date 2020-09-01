@@ -1,10 +1,15 @@
-from typing import List, Callable
+from typing import List, Callable, Any
 
 import lang.token as tok
+
 from lang.tokenizer import Tokenizer
+from lang.error import error
+
 from lang.ast import *
+from lang.symtab import *
 
 # Parser
+
 
 class Parser:
     """
@@ -18,7 +23,9 @@ class Parser:
 
         self._tokenizer = tokenizer
         self.curr = self._tokenizer.produce()
-        self.symtab = {} # Stores types for variables (used for validation)
+
+        # Stores types for variables (used for validation)
+        self.symtab = SymbolTable(1, "global", None)
 
     def _consume(self, type) -> None:
         """
@@ -27,7 +34,7 @@ class Parser:
         """
 
         if self.curr.type != type:
-            raise SyntaxError(f"Expected '{type}' <line:{self.curr.line},col:{self.curr.col}>")
+            error(f"Expected '{type}'", self.curr)
 
         self.curr = self._tokenizer.produce()
 
@@ -41,7 +48,13 @@ class Parser:
         node = None
 
         if operand_token.type == tok.ID:
-            node = self._variable()
+            next_char = self._tokenizer.peek()
+
+            if next_char == tok.L_PAREN:
+                node = self._process_call()
+
+            else:
+                node = self._variable()
 
         elif operand_token.type == tok.NUMBER:
             self._consume(tok.NUMBER)
@@ -50,6 +63,10 @@ class Parser:
         elif operand_token.type == tok.STRING:
             self._consume(tok.STRING)
             node = String(operand_token)
+
+        elif operand_token.type == tok.NOTHING:
+            self._consume(tok.NOTHING)
+            node = Nothing(operand_token)
 
         elif operand_token.type in (tok.BOOL_T, tok.BOOL_F):
             self._consume(operand_token.type)
@@ -141,12 +158,13 @@ class Parser:
         token = self.curr
         var_name = token.value
 
-        if var_name not in self.symtab:
-            raise SyntaxError(f"Variable '{var_name}' referenced before declaration <line:{token.line},col:{token.col}>")
+        if not self.symtab.exists(var_name):
+            error(f"Variable '{var_name}' referenced before declaration", token)
 
+        var_type = self.symtab.get(var_name).type_def
         self._consume(tok.ID)
 
-        return Variable(token)
+        return Variable(token, var_type)
 
     def _variable_type(self) -> AST:
         """
@@ -156,8 +174,8 @@ class Parser:
 
         token = self.curr
 
-        if token.type not in (tok.NUM, tok.BOOL, tok.STR):
-            raise SyntaxError(f"Invalid type definition: {token.type} <line:{token.line},col:{token.col}>")
+        if token.type not in (tok.NUM, tok.BOOL, tok.STR, tok.NIL):
+            error(f"Invalid type definition: '{token.value}'", token)
 
         self._consume(token.type)
 
@@ -171,20 +189,111 @@ class Parser:
         token = self.curr
         var_name = token.value
 
-        if var_name in self.symtab:
-            raise SyntaxError(f"Variable '{var_name}' declared more than once <line:{token.line},col:{token.col}>")
-
-        variable = Variable(token)
+        if self.symtab.exists(var_name):
+            error(f"Variable '{var_name}' declared more than once", token)
 
         self._consume(tok.ID)
         self._consume(tok.COLON)
 
         var_type = self._variable_type()
+        variable = Variable(token, var_type.value)
 
-        self.symtab[var_name] = var_type.value
+        sym = VariableSymbol(var_name, var_type.value)
+        self.symtab.put(sym)
 
         return VariableDeclaration(variable, var_type)
 
+    def _process_declaration(self) -> AST:
+        """
+        Parses a variable declaration
+        """
+
+        token = self.curr
+        proc_name = token.value
+
+        if self.symtab.exists(proc_name):
+            error(f"Name '{proc_name}' declared more than once", token)
+
+        self._consume(tok.ID)
+        self._consume(tok.COLON)
+
+        proc_type = self._variable_type()
+
+        params = []
+        self._consume(tok.L_PAREN)
+
+        # Shifting the scope of the symbol table to the processes level
+        prev_tab = self.symtab
+        self.symtab = SymbolTable(prev_tab.sc_level + 1, proc_name, prev_tab)
+
+        if self.curr.type != tok.R_PAREN:
+            params.append(self._variable_declaration())
+
+        while self.curr.type == tok.COMMA:
+            self._consume(tok.COMMA)
+            params.append(self._variable_declaration())
+
+        sym = ProcessSymbol(proc_name, proc_type.value, params)
+        prev_tab.put(sym)
+
+        self._consume(tok.R_PAREN)
+
+        return ProcessDeclaration(token, proc_type, params)
+
+    def _process(self) -> AST:
+        """
+        Parses a process
+            process : proc id colon type lparen parameters rparen lbrace statements rbrace
+        """
+
+        self._consume(tok.PROC)
+
+        proc_dec = self._process_declaration()
+        proc_name = proc_dec.value
+
+        block = self._block()
+        process = Process(proc_dec, block)
+
+        # Store a pointer to this process node in the process symbol
+        self.symtab.get(proc_name).process = process
+
+        return process
+
+    def _process_call(self) -> AST:
+        """
+        Parses a call to a process
+            process_call : id lparen (disjunction (comma disjunction)*)? rparen
+        """
+
+        token = self.curr
+        proc_name = token.value
+
+        st_entry = self.symtab.get(proc_name)
+
+        if not st_entry:
+            error(f"Process {proc_name} not defined", token)
+
+        elif not st_entry.is_proc:
+            error(f"Identifier {proc_name} does not refer to a process", token)
+
+        self._consume(tok.ID)
+
+        args = []
+        self._consume(tok.L_PAREN)
+
+        if self.curr.type != tok.R_PAREN:
+            args.append(self._disjunction())
+
+        while self.curr.type == tok.COMMA:
+            self._consume(tok.COMMA)
+            args.append(self._disjunction())
+
+        self._consume(tok.R_PAREN)
+
+        if len(st_entry.params) != len(args):
+            error(f"Incorrect number of args ({len(args)}) for process '{proc_name}'", token)
+
+        return ProcessCall(token, args, st_entry)
 
     def _say(self) -> AST:
         """
@@ -214,6 +323,7 @@ class Parser:
 
         token = self.curr
         var_name = token.value
+
         next_char = self._tokenizer.peek()
 
         if next_char == tok.COLON:
@@ -222,26 +332,64 @@ class Parser:
         else:
             to_assign = self._variable()
 
-        var_type = self.symtab[var_name]
+        var_type = self.symtab.get(var_name)
         self._consume(tok.ASSIGN)
 
         return AssignmentStatement(to_assign, token, self._disjunction())
 
+    def _return(self) -> AST:
+        """
+        Parses a return statement
+        """
+
+        self._consume(tok.RETURN)
+
+        return Return(self._disjunction())
+
+    def _block(self) -> AST:
+        """
+        Parses a block of code
+        """
+
+        self._consume(tok.L_BRACE)
+
+        statements = []
+        while self.curr.type != tok.R_BRACE:
+            statements.append(self._statement())
+
+        self.symtab = self.symtab.sc_enclosing
+
+        self._consume(tok.R_BRACE)
+
+        return Block(statements)
+
     def _statement(self) -> AST:
         """
         Parses a statement
-            statement : [ empty | assignment_statement | say | expression ] sep
+            statement : [ empty | assignment_statement |
+                          say | disjunction | conditional
+                        ] sep
         """
 
         token = self.curr
         next_char = self._tokenizer.peek()
 
-        if token.type == tok.ID and next_char in (tok.COLON, tok.ASSIGN):
+        if token.type == tok.PROC:
+            stmt = self._process()
+
+        elif token.type == tok.ID and next_char == tok.L_PAREN:
+            # Call for a process
+            stmt = self._process_call()
+
+        elif token.type == tok.ID and next_char in (tok.COLON, tok.ASSIGN):
             # Either declaring a variable or assigning.
             stmt = self._assignment_statement()
 
         elif token.type == tok.SAY:
             stmt = self._say()
+
+        elif token.type == tok.RETURN:
+            stmt = self._return()
 
         elif token.type == tok.SEP:
             stmt = self._empty()

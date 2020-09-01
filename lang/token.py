@@ -4,9 +4,12 @@ from lang.tokenizer import Token
 STRING = "string"
 NUMBER = "number"
 BOOLEAN = "boolean"
+NIL = "nil"
 
 BOOL_T = "true"
 BOOL_F = "false"
+
+NOTHING = "nothing"
 
 ID = "id"
 NUM = "num"
@@ -39,8 +42,11 @@ ASSIGN = "="
 
 SEP = ";"
 COLON = ":"
+COMMA = ","
 
 SAY = "say"
+PROC = "proc"
+RETURN = "return"
 
 IF = "if"
 ELIF = "elif"
@@ -54,7 +60,7 @@ reserved_single_char = {
     GREATER, LESS,
     L_PAREN, R_PAREN,
     L_BRACE, R_BRACE,
-    ASSIGN, COLON,
+    ASSIGN, COLON, COMMA,
     SEP
 }
 
@@ -67,13 +73,9 @@ reserved_double_char = {
 
 def build_keywords() -> dict:
     return {
-        NUM,
-        STR,
-        BOOL,
-        BOOL_T,
-        BOOL_F,
-        IF,
-        ELIF,
-        ELSE,
+        NUM, STR, BOOL, NIL,
+        PROC, RETURN,
+        BOOL_T, BOOL_F, NOTHING,
+        IF, ELIF, ELSE,
         SAY
     }

@@ -1,12 +1,14 @@
 
+from typing import Any
+
 import lang.token as tok
 import lang.validation as validation
 
-from typing import Any
-
+from lang.error import error
 from lang.tokenizer import Token, Tokenizer
 from lang.parser import Parser
 from lang.ast import AST
+from lang.callstack import CallStack, StackFrame, FrameTypes
 
 # Interpreter
 
@@ -43,7 +45,7 @@ class Interpreter(Visitor):
         """
 
         self.parser = Parser(Tokenizer(text))
-        self.global_memory = {}
+        self.stack = CallStack()
 
     def _number(self, node: AST) -> int:
         """
@@ -66,6 +68,15 @@ class Interpreter(Visitor):
 
         return node.value
 
+    def _nothing(self, node: AST) -> None:
+        """
+        Visits a nothing node
+        """
+
+        return None
+
+
+
     def _unary_operator(self, node: AST) -> Any:
         """
         Visits a unary operator (can be +/-)
@@ -75,8 +86,7 @@ class Interpreter(Visitor):
         token = node.token
 
         operand = self.visit(node.child)
-
-        validation.validate_operation(op_type, (token.line, token.col), operand)
+        validation.validate_operation(op_type, token, operand)
 
         if op_type == tok.NOT:
             return not operand
@@ -88,7 +98,7 @@ class Interpreter(Visitor):
             return -operand
 
         token = node.token
-        raise SyntaxError(f"Invalid unary operator {op_type} <line:{token.line},col:{token.col}>")
+        error(f"Invalid unary operator {op_type}", token)
 
     def _binary_operator(self, node: AST) -> Any:
         """
@@ -102,7 +112,7 @@ class Interpreter(Visitor):
         r = self.visit(node.right)
 
         token = node.token
-        validation.validate_operation(op_type, (token.line, token.col), l, r)
+        validation.validate_operation(op_type, token, l, r)
 
         if op_type == tok.ADD:
             return l + r
@@ -143,21 +153,23 @@ class Interpreter(Visitor):
         if op_type == tok.LEQ:
             return l <= r
 
-        raise SyntaxError(f"Invalid binary operator '{op_type}', <line:{token.line},col:{token.col}>")
+        error(f"Invalid binary operator '{op_type}'", token)
 
     def _variable(self, node: AST) -> AST:
         """
         Interprets a variable
         """
 
-        return self.global_memory[node.value]
+        fr = self.stack.peek()
+        return fr[node.value]
 
     def _variable_declaration(self, node: AST) -> None:
         """
         Interprets a variable declaration
         """
 
-        self.global_memory[node.value] = None
+        fr = self.stack.peek()
+        fr[node.value] = None
 
     def _say(self, node: AST) -> None:
         """
@@ -179,21 +191,70 @@ class Interpreter(Visitor):
         """
 
         var_id = node.left.value
-        var_type = self.parser.symtab[var_id]
-        asn = self.visit(node.right)
-
+        var_type = node.left.var_type
         token = node.token
-        validation.validate_type(var_type, (token.line, token.col), asn)
 
-        self.global_memory[var_id] = asn
+        asn = self.visit(node.right)
+        validation.validate_type(var_type, token, asn)
+
+        fr = self.stack.peek()
+        fr[var_id] = asn
+
+    def _return(self, node: AST) -> None:
+        """
+        Interprets a return statement
+        """
+
+        fr = self.stack.peek()
+        ret_val = self.visit(node.statement)
+
+        fr.ret_val = ret_val
+        fr.returned = True
+
+    def _process_call(self, node: AST) -> Any:
+        """
+        Interprets a process call
+        """
+
+        proc_name = node.value
+        sym = node.proc_sym
+
+        fr = StackFrame(proc_name, FrameTypes.PROCESS, 2)
+
+        for param, arg in zip(sym.params, node.args):
+            fr[param.value] = self.visit(arg)
+
+        self.stack.push(fr)
+        self.visit(sym.process.block)
+
+        ret_val = self.stack.pop()
+        validation.validate_return(sym.type_def, node.token, ret_val)
+
+        return ret_val
+
+    def _block(self, node: AST) -> None:
+        """
+        Interprets a block of code
+        """
+
+        fr = self.stack.peek()
+        for statement in node.statements:
+            self.visit(statement)
+            if fr.returned:
+                return # Return when we hit a ret statement
 
     def _program(self, node: AST) -> None:
         """
         Interprets a program
         """
 
-        for child in node.statements:
-            self.visit(child)
+        fr = StackFrame("main", FrameTypes.PROGRAM, 1)
+        self.stack.push(fr)
+
+        for statement in node.statements:
+            self.visit(statement)
+
+        self.stack.pop()
 
     def interpret(self) -> None:
         """
