@@ -272,10 +272,7 @@ class Process(AST):
 
         return f"{self.declr}{{ \n {statement_fmt}\n}}"
 
-class ConditionalIf(AST):
-    """
-    Represents an if statement
-    """
+class Condition(AST):
 
     def __init__(self, condition: AST, block: AST):
         self.token = condition.token
@@ -283,10 +280,24 @@ class ConditionalIf(AST):
         self.block = block
 
     def name(self) -> str:
-        return "conditional_if"
+        return "condition"
 
     def __str__(self) -> str:
-        return f"if {self.condition} \n {self.block}"
+        return f"cond {self.condition} \n {self.block}"
+
+class Conditions(AST):
+    """
+    Represents a block of conditions
+    """
+
+    def __init__(self, conditions: List[AST]):
+        self.conditions = conditions
+
+    def name(self) -> str:
+        return "conditions"
+
+    def __str__(self) -> str:
+        return str(conditions)
 
 
 class Block(AST):

@@ -12,6 +12,7 @@ from lang.callstack import CallStack, ActivationRecord
 
 # Interpreter
 
+
 class Visitor(object):
     """
     Superclass that calls methods used to visit certain nodes on the AST.
@@ -198,18 +199,19 @@ class Interpreter(Visitor):
         record = self.stack.peek()
         record[var_id] = asn
 
-    def _conditional_if(self, node: AST) -> None:
+    def _conditions(self, node: AST) -> None:
         """
-        Interprets a conditional if
+        Interprets a conditional block
         """
 
-        token = node.token
+        for cond in node.conditions:
 
-        cond_result = self.visit(node.condition)
-        validation.validate_condition(token, cond_result)
+            eval = self.visit(cond.condition)
+            validation.validate_condition(cond.token, eval)
 
-        if cond_result:
-            self.visit(node.block)
+            if eval:
+                self.visit(cond.block)
+                return
 
     def _return(self, node: AST) -> None:
         """
@@ -230,7 +232,8 @@ class Interpreter(Visitor):
         proc_name = node.value
         proc_sym = node.proc_sym
 
-        record = ActivationRecord(proc_name, proc_sym.sc_level, self.stack.peek())
+        record = ActivationRecord(
+            proc_name, proc_sym.sc_level, self.stack.peek())
 
         for param, arg in zip(proc_sym.params, node.args):
             record[param.value] = self.visit(arg)
@@ -252,7 +255,7 @@ class Interpreter(Visitor):
         for statement in node.statements:
             self.visit(statement)
             if record.returned:
-                return # Return when we hit a ret statement
+                return  # Return when we hit a ret statement
 
     def _program(self, node: AST) -> None:
         """

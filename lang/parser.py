@@ -231,6 +231,9 @@ class Parser:
         """
 
         token = self.curr
+        conditions = []
+
+        scope_level = self.symtab.sc_level + 1
 
         self._consume(tok.IF)
 
@@ -239,12 +242,31 @@ class Parser:
         self._consume(tok.R_PAREN)
 
         # Shifting the scope of the symbol table to the conditional level
-        prev_tab = self.symtab
-        self.symtab = SymbolTable(prev_tab.sc_level + 1, "if", prev_tab)
+        self.symtab = SymbolTable(scope_level, "if", self.symtab)
+        conditions.append(Condition(condition, self._block()))
 
-        block = self._block()
+        while self.curr.type == tok.ELIF:
+            self._consume(tok.ELIF)
 
-        return ConditionalIf(condition, block)
+            self._consume(tok.L_PAREN)
+            condition = self._disjunction()
+            self._consume(tok.R_PAREN)
+
+            self.symtab = SymbolTable(scope_level, "elif", self.symtab)
+            conditions.append(Condition(condition, self._block()))
+
+        if self.curr.type == tok.ELSE:
+            # Use this to always eval True for else during interpretation
+            else_tok = self.curr
+            else_tok.value = tok.BOOL_T
+            else_cond = Boolean(else_tok)
+            
+            self._consume(tok.ELSE)
+
+            self.symtab = SymbolTable(scope_level, "else", self.symtab)
+            conditions.append(Condition(else_cond, self._block()))
+
+        return Conditions(conditions)
 
     def _process_declaration(self) -> AST:
         """
