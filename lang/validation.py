@@ -14,8 +14,8 @@ _type_switch = {
 }
 
 _op_switch = {
-    tok.NUM    : (tok.ADD, tok.SUB, tok.MUL, tok.DIV, tok.I_DIV, tok.EQ,
-                  tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS),
+    tok.NUM    : (tok.ADD, tok.SUB, tok.MUL, tok.DIV, tok.MOD, tok.I_DIV,
+                  tok.EQ, tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS),
     tok.BOOL   : (tok.AND, tok.OR, tok.NOT, tok.EQ, tok.NEQ),
     tok.STR    : (tok.ADD, tok.EQ, tok.NEQ),
     tok.NIL    : (tok.EQ, tok.NEQ)

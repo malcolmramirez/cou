@@ -2,7 +2,7 @@
 Utility module used for raising error messages
 """
 
-def error(msg: str, token = None, pos = None):
+def error(msg: str, pos = None):
     """
     Utility method to raise SyntaxError
     """
@@ -10,13 +10,14 @@ def error(msg: str, token = None, pos = None):
     line = 0
     col = 0
 
-    if token:
-        line = token.line
-        col = token.col
-
-    elif pos:
+    if type(pos) == tuple:
         line = pos[0]
         col = pos[1]
+
+    elif pos:
+        line = pos.line
+        col = pos.col
+
 
 
     raise SyntaxError(f"{msg}, <line:{line},col:{col}>")

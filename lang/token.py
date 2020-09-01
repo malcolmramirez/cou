@@ -20,6 +20,7 @@ ADD = "+"
 SUB = "-"
 MUL = "*"
 DIV = "/"
+MOD = "%"
 I_DIV = "%/"
 
 NOT = "!"
@@ -55,7 +56,7 @@ ELSE = "else"
 EOF = "eof"
 
 reserved_single_char = {
-    ADD, SUB, MUL, DIV,
+    ADD, SUB, MUL, DIV, MOD,
     NOT,
     GREATER, LESS,
     L_PAREN, R_PAREN,

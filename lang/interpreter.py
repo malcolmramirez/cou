@@ -8,7 +8,7 @@ from lang.error import error
 from lang.tokenizer import Token, Tokenizer
 from lang.parser import Parser
 from lang.ast import AST
-from lang.callstack import CallStack, ActivationRecord
+from lang.callstack import CallStack, ActivationRecord, Record
 
 # Interpreter
 
@@ -125,6 +125,9 @@ class Interpreter(Visitor):
         if op_type == tok.DIV:
             return l / r
 
+        if op_type == tok.MOD:
+            return l % r
+
         if op_type == tok.I_DIV:
             return l // r
 
@@ -218,11 +221,11 @@ class Interpreter(Visitor):
         Interprets a return statement
         """
 
-        fr = self.stack.peek()
+        record = self.stack.peek()
         ret_val = self.visit(node.statement)
 
-        fr.ret_val = ret_val
-        fr.returned = True
+        record.ret_val = ret_val
+        record.returned = True
 
     def _process_call(self, node: AST) -> Any:
         """
@@ -241,7 +244,7 @@ class Interpreter(Visitor):
         self.stack.push(record)
         self.visit(proc_sym.process.block)
 
-        ret_val = self.stack.pop()
+        ret_val = self.stack.pop().ret_val
         validation.validate_return(proc_sym.type_def, node.token, ret_val)
 
         return ret_val
@@ -252,6 +255,7 @@ class Interpreter(Visitor):
         """
 
         record = self.stack.peek()
+
         for statement in node.statements:
             self.visit(statement)
             if record.returned:

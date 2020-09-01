@@ -104,7 +104,7 @@ class Parser:
             term : factor ((mul|div) factor)*
         """
 
-        return self._parse_binop(self._factor, (tok.MUL, tok.DIV, tok.I_DIV))
+        return self._parse_binop(self._factor, (tok.MUL, tok.DIV, tok.MOD, tok.I_DIV))
 
     def _sum(self) -> AST:
         """
@@ -260,7 +260,7 @@ class Parser:
             else_tok = self.curr
             else_tok.value = tok.BOOL_T
             else_cond = Boolean(else_tok)
-            
+
             self._consume(tok.ELSE)
 
             self.symtab = SymbolTable(scope_level, "else", self.symtab)

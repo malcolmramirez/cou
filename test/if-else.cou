@@ -1,0 +1,48 @@
+
+integer: num = 0;
+
+if (integer == 0) {
+    say 'integer is 0';
+}
+
+integer = 1;
+
+if (integer < 0) {
+    say 'integer is less than 0';
+
+} elif (integer == 1) {
+    say 'integer is 1';
+
+} else {
+    say 'integer is greater than 1';
+}
+
+integer = 2;
+
+if (integer < 0) {
+    say 'integer is less than 0';
+
+} elif (integer == 1) {
+    say 'integer is 1';
+
+} elif (integer < 1 && integer >= 0) {
+    say 'integer is between 0 and 1';
+
+} else {
+    say 'integer is greater than 1';
+}
+
+integer = 0;
+
+if (integer < 0) {
+    say 'integer is less than 0';
+
+} elif (integer == 1) {
+    say 'integer is 1';
+
+} elif (integer < 1 && integer >= 0) {
+    say 'integer is between 0 and 1';
+
+} else {
+    say 'integer is greater than 1';
+}

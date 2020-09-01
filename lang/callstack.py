@@ -86,7 +86,7 @@ class CallStack(object):
         Pops an item off of the stack
         """
 
-        return self.stack.pop().ret_val
+        return self.stack.pop()
 
     def peek(self) -> Any:
         """
