@@ -8,7 +8,7 @@ from lang.error import error
 from lang.tokenizer import Token, Tokenizer
 from lang.parser import Parser
 from lang.ast import AST
-from lang.callstack import CallStack, StackFrame
+from lang.callstack import CallStack, ActivationRecord
 
 # Interpreter
 
@@ -74,8 +74,6 @@ class Interpreter(Visitor):
         """
 
         return None
-
-
 
     def _unary_operator(self, node: AST) -> Any:
         """
@@ -160,8 +158,8 @@ class Interpreter(Visitor):
         Interprets a variable
         """
 
-        fr = self.stack.peek()
-        return fr[node.value]
+        record = self.stack.peek()
+        return record[node.value]
 
     def _variable_declaration(self, node: AST) -> None:
         """
@@ -197,8 +195,8 @@ class Interpreter(Visitor):
         asn = self.visit(node.right)
         validation.validate_type(var_type, token, asn)
 
-        fr = self.stack.peek()
-        fr[var_id] = asn
+        record = self.stack.peek()
+        record[var_id] = asn
 
     def _conditional_if(self, node: AST) -> None:
         """
@@ -206,15 +204,12 @@ class Interpreter(Visitor):
         """
 
         token = node.token
+
         cond_result = self.visit(node.condition)
-
         validation.validate_condition(token, cond_result)
-
-        fr = StackFrame("if", 2, self.stack.peek())
 
         if cond_result:
             self.visit(node.block)
-
 
     def _return(self, node: AST) -> None:
         """
@@ -235,12 +230,12 @@ class Interpreter(Visitor):
         proc_name = node.value
         proc_sym = node.proc_sym
 
-        fr = StackFrame(proc_name, proc_sym.sc_level, self.stack.peek())
+        record = ActivationRecord(proc_name, proc_sym.sc_level, self.stack.peek())
 
         for param, arg in zip(proc_sym.params, node.args):
-            fr[param.value] = self.visit(arg)
+            record[param.value] = self.visit(arg)
 
-        self.stack.push(fr)
+        self.stack.push(record)
         self.visit(proc_sym.process.block)
 
         ret_val = self.stack.pop()
@@ -253,10 +248,10 @@ class Interpreter(Visitor):
         Interprets a block of code
         """
 
-        fr = self.stack.peek()
+        record = self.stack.peek()
         for statement in node.statements:
             self.visit(statement)
-            if fr.returned:
+            if record.returned:
                 return # Return when we hit a ret statement
 
     def _program(self, node: AST) -> None:
@@ -264,8 +259,8 @@ class Interpreter(Visitor):
         Interprets a program
         """
 
-        fr = StackFrame("main", 1)
-        self.stack.push(fr)
+        record = ActivationRecord("main", 1)
+        self.stack.push(record)
 
         for statement in node.statements:
             self.visit(statement)

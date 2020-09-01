@@ -158,10 +158,10 @@ class Parser:
         token = self.curr
         var_name = token.value
 
-        if not self.symtab.exists(var_name):
+        if var_name not in self.symtab:
             error(f"Variable '{var_name}' referenced before declaration", token)
 
-        var_type = self.symtab.get(var_name).type_def
+        var_type = self.symtab[var_name].type_def
         self._consume(tok.ID)
 
         return Variable(token, var_type)
@@ -189,7 +189,7 @@ class Parser:
         token = self.curr
         var_name = token.value
 
-        if self.symtab.exists(var_name):
+        if var_name in self.symtab:
             error(f"Variable '{var_name}' declared more than once", token)
 
         self._consume(tok.ID)
@@ -198,8 +198,7 @@ class Parser:
         var_type = self._variable_type()
         variable = Variable(token, var_type.value)
 
-        sym = VariableSymbol(var_name, var_type.value)
-        self.symtab.put(sym)
+        self.symtab[var_name] = VariableSymbol(var_name, var_type.value)
 
         return VariableDeclaration(variable, var_type)
 
@@ -221,7 +220,7 @@ class Parser:
         else:
             to_assign = self._variable()
 
-        var_type = self.symtab.get(var_name)
+        var_type = self.symtab[var_name]
         self._consume(tok.ASSIGN)
 
         return AssignmentStatement(to_assign, token, self._disjunction())
@@ -255,7 +254,7 @@ class Parser:
         token = self.curr
         proc_name = token.value
 
-        if self.symtab.exists(proc_name):
+        if proc_name in self.symtab:
             error(f"Name '{proc_name}' declared more than once", token)
 
         self._consume(tok.ID)
@@ -277,8 +276,7 @@ class Parser:
             self._consume(tok.COMMA)
             params.append(self._variable_declaration())
 
-        sym = ProcessSymbol(proc_name, proc_type.value, self.symtab.sc_level, params)
-        prev_tab.put(sym)
+        prev_tab[proc_name] = ProcessSymbol(proc_name, proc_type.value, self.symtab.sc_level, params)
 
         self._consume(tok.R_PAREN)
 
@@ -299,7 +297,7 @@ class Parser:
         process = Process(proc_dec, block)
 
         # Store a pointer to this process node in the process symbol
-        self.symtab.get(proc_name).process = process
+        self.symtab[proc_name].process = process
 
         return process
 
@@ -312,12 +310,12 @@ class Parser:
         token = self.curr
         proc_name = token.value
 
-        st_entry = self.symtab.get(proc_name)
+        if proc_name not in self.symtab:
+            error(f"Process {proc_name} not defined in current scope", token)
 
-        if not st_entry:
-            error(f"Process {proc_name} not defined", token)
+        st_entry = self.symtab[proc_name]
 
-        elif not st_entry.is_proc:
+        if not st_entry.is_proc:
             error(f"Identifier {proc_name} does not refer to a process", token)
 
         self._consume(tok.ID)

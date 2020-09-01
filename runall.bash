@@ -1,6 +1,6 @@
  #!/bin/bash
 
-for entry in "programs"/*
+for entry in "test"/*
 do
     echo $entry
     python3 'cou.py' $entry

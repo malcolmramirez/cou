@@ -1,0 +1,33 @@
+
+s: str = 'glogal';
+
+proc bool_str: str(boolean: bool) {
+    if (boolean) {
+        return 'true';
+    }
+
+    return 'false';
+}
+
+
+proc cool_proc: nil(boolean: bool) {
+    string: str = 'i\'d say';
+
+    proc manip: str() {
+        mnp: str = string + ' yo whattap ';
+
+        proc mn: str() {
+            return bool_str(boolean);
+        }
+
+        return mn() + ' ' + mnp;
+    }
+
+    s = manip() + ' ' + s;
+}
+
+
+
+cool_proc(true);
+
+say s;

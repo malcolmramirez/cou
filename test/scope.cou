@@ -1,0 +1,14 @@
+
+a: num = 2;
+
+proc pr2: nil() {
+    a = 1;
+}
+
+proc pr1: nil() {
+    a = 0;
+    pr2();
+    say a;
+}
+
+pr1();

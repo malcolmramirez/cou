@@ -84,9 +84,10 @@ class SymbolTable(object):
         Initalizes type symbols
         """
 
-        self.put(TypeSymbol(tok.NUM))
-        self.put(TypeSymbol(tok.BOOL))
-        self.put(TypeSymbol(tok.STR))
+        self[tok.NUM]  = TypeSymbol(tok.NUM)
+        self[tok.BOOL] = TypeSymbol(tok.BOOL)
+        self[tok.STR]  = TypeSymbol(tok.STR)
+        self[tok.NIL]  = TypeSymbol(tok.NIL)
 
     def __str__(self) -> str:
         s = f"symtab {self.sc_name}, level:{self.sc_level}"
@@ -96,30 +97,30 @@ class SymbolTable(object):
 
         return s
 
-    def put(self, symbol: Symbol):
+    def __setitem__(self, key: str, symbol: Symbol):
         """
         Puts a symbol in the table
         """
 
-        self._symbols[symbol.name] = symbol
+        self._symbols[key] = symbol
 
-    def get(self, key: str) -> Symbol:
+    def __getitem__(self, key: str) -> Symbol:
         """
         Retrieves a symbol from the table
         """
 
         if key not in self._symbols and self.sc_enclosing:
-            return self.sc_enclosing.get(key)
+            return self.sc_enclosing[key]
 
         return self._symbols[key]
 
-    def exists(self, key: str):
+    def __contains__(self, key: str):
         """
         Returns true if a symbol exists in the table
         """
 
         exists_flag = key in self._symbols
         if self.sc_enclosing and not exists_flag:
-            exists_flag = self.sc_enclosing.exists(key)
+            exists_flag = key in self.sc_enclosing
 
         return exists_flag
