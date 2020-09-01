@@ -1,0 +1,12 @@
+proc fibonacci: num(c_num: num) {
+    if (c_num == 0) {
+        return 0;
+
+    } elif (c_num == 1) {
+        return 1;
+    }
+
+    return fibonacci(c_num - 1) + fibonacci(c_num - 2);
+}
+
+say fibonacci(25);
