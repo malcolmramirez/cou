@@ -5,19 +5,12 @@ proc fmt: str(i: num, j: num, k: num) {
 
 i: num = 0;
 
-as (i < 10) {
-
-    j: num = 0;
-    as (j < 15) {
-
-        k: num = 0;
-        as (k < 20) {
+as (i = 2; i < 10; i = i + 2) {
+    as (j: num = 0; j < 15; j = j + 3) {
+        as (k: num = 0; k < 20; k = k + 4) {
             say fmt(i, j, k);
-            k = k + 1;
         }
-
-        j = j + 1;
     }
-
-    i = i + 1;
 }
+
+say 'i: ' + i;

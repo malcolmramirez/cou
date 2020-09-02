@@ -1,0 +1,14 @@
+
+proc count_to_n: str(n: num) {
+    # Counts to n
+
+    count: str = '';
+
+    as (i: num = 0; i < n; count = count + i + ' ') {
+        i = i + 1;
+    }
+
+    return count;
+}
+
+say count_to_n(100);

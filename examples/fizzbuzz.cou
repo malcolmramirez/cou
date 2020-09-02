@@ -1,19 +1,22 @@
-i: num = 1;
 
-as (i < 101) {
+proc fizzbuzz: nil(n: num) {
+    # Executes the fizzbuzz game for n iterations
 
-    if (i % 15 == 0) {
-        say 'fizzbuzz';
+    as (i: num = 1; i <= n; i = i + 1) {
 
-    } elif (i % 3 == 0) {
-        say 'fizz';
+        if (i % 15 == 0) {
+            say 'fizzbuzz';
 
-    } elif (i % 5 == 0) {
-        say 'buzz';
+        } elif (i % 3 == 0) {
+            say 'fizz';
 
-    } else {
-        say i;
+        } elif (i % 5 == 0) {
+            say 'buzz';
+
+        } else {
+            say i;
+        }
     }
-
-    i = i + 1;
 }
+
+fizzbuzz(100);

@@ -321,21 +321,44 @@ class Conditions(AST):
         return str(self.conditions)
 
 
+class AsDeclaration(AST):
+
+    def __init__(self, token: Token, counter: AST, condition: AST, after: AST):
+        self.token = token
+        self.counter = counter
+        self.condition = condition
+        self.after = after
+
+    def name(self) -> str:
+        return "as_declaration"
+
+    def __str__(self) -> str:
+        fmt = '('
+        if self.var_declr:
+            fmt += f"{self.var_declr};"
+        fmt += f"{self.condition}"
+        if self.asn_statement:
+            fmt += f";{self.asn_statement}"
+        fmt = ')'
+
+        return fmt
+
+
 class As(AST):
     """
     Represents an as loop
     """
 
-    def __init__(self, token: Token, condition: AST, block: AST):
+    def __init__(self, token: Token, declr: AST, block: AST):
         self.token = token
-        self.condition = condition
+        self.declr = declr
         self.block = block
 
     def name(self) -> str:
         return "as"
 
     def __str__(self) -> str:
-        return f"as {self.condition} {self.block}"
+        return f"as {self.declr} {self.block}"
 
 
 class Block(AST):

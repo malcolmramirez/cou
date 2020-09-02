@@ -114,7 +114,7 @@ class Interpreter(Visitor):
         validation.validate_operation(op_type, token, l, r)
 
         if op_type == tok.ADD:
-            
+
             if type(l) == str:
                 r = str(r)
 
@@ -228,16 +228,23 @@ class Interpreter(Visitor):
         Interprets an as loop
         """
 
-        eval = self.visit(node.condition)
-        validation.validate_condition(node.token, eval)
+        counter = node.declr.counter
+        condition = node.declr.condition
+        do_after = node.declr.after
 
-        while eval:
+        if counter:
+            self.visit(counter)
+
+        condition_eval = self.visit(condition)
+        validation.validate_condition(node.token, condition_eval)
+
+        while condition_eval:
             self.visit(node.block)
+            if do_after:
+                self.visit(do_after)
 
-            eval = self.visit(node.condition)
-            validation.validate_condition(node.token, eval)
-
-
+            condition_eval = self.visit(condition)
+            validation.validate_condition(node.token, condition_eval)
 
 
     def _return(self, node: AST) -> None:

@@ -268,23 +268,49 @@ class Parser:
 
         return Conditions(conditions)
 
+    def _as_declaration(self) -> AST:
+        """
+        Parses the declaration of an 'as' block
+            as_declaration : lparen (assignment_statement sep)? disjunction sep (assignment_statement sep)?
+        """
+
+        scope_level = self.symtab.sc_level + 1
+        self.symtab = SymbolTable(scope_level, "as", self.symtab)
+
+        self._consume(tok.L_PAREN)
+
+        token = self.curr
+
+        next_char = self._tokenizer.peek()
+        var_declr = None
+
+        if token.type == tok.ID and \
+                (next_char == tok.COLON or next_char == tok.ASSIGN):
+            # This is an assignment statement
+            var_declr = self._assignment_statement()
+            self._consume(tok.SEP)
+
+        condition = self._disjunction()
+
+        asn_statement = None
+        if self.curr.type != tok.R_PAREN:
+            self._consume(tok.SEP)
+            asn_statement = self._assignment_statement()
+
+        self._consume(tok.R_PAREN)
+
+        return AsDeclaration(token, var_declr, condition, asn_statement)
+
     def _as(self) -> AST:
         """
         Parses an 'as' block, ie, a loop
+            as: as as_declaration block
         """
 
         token = self.curr
-        scope_level = self.symtab.sc_level + 1
-
         self._consume(tok.AS)
 
-        self._consume(tok.L_PAREN)
-        condition = self._disjunction()
-        self._consume(tok.R_PAREN)
-
-        self.symtab = SymbolTable(scope_level, "as", self.symtab)
-
-        return As(token, condition, self._block())
+        return As(token, self._as_declaration(), self._block())
 
     def _process_declaration(self) -> AST:
         """
