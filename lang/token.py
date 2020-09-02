@@ -15,6 +15,7 @@ ID = "id"
 NUM = "num"
 BOOL = "bool"
 STR = "str"
+ARR = "arr"
 
 ADD = "+"
 SUB = "-"
@@ -39,6 +40,9 @@ R_PAREN = ")"
 L_BRACE = "{"
 R_BRACE = "}"
 
+L_BRACK = "["
+R_BRACK = "]"
+
 ASSIGN = "="
 
 SEP = ";"
@@ -62,6 +66,7 @@ reserved_single_char = {
     GREATER, LESS,
     L_PAREN, R_PAREN,
     L_BRACE, R_BRACE,
+    L_BRACK, R_BRACK,
     ASSIGN, COLON, COMMA,
     SEP
 }
@@ -75,7 +80,7 @@ reserved_double_char = {
 
 def build_keywords() -> dict:
     return {
-        NUM, STR, BOOL, NIL,
+        NUM, STR, BOOL, ARR, NIL,
         PROC, RETURN, AS,
         BOOL_T, BOOL_F, NOTHING,
         IF, ELIF, ELSE,

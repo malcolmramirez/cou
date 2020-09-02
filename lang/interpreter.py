@@ -76,6 +76,63 @@ class Interpreter(Visitor):
 
         return None
 
+    def _array_element(self, node: AST) -> Any:
+        """
+        Visits an array element
+        """
+
+        token = node.token
+
+        record = self.stack.peek()
+        arr = record[node.arr_name]
+
+        indices = node.indices
+        asn_i = len(indices) - 1
+
+        for i in range(asn_i):
+            index = self.visit(indices[i])
+            validation.validate_array_index(token, index, arr)
+
+            arr = arr[index]
+
+        index = self.visit(indices[asn_i])
+        validation.validate_array_index(token, index, arr)
+        return arr[index]
+
+    def _array_element_assignment(self, node: AST) -> None:
+        """
+        Visits an array element assignment
+        """
+
+        token = node.token
+
+        record = self.stack.peek()
+        arr = record[node.left.arr_name]
+
+        indices = node.left.indices
+        asn_i = len(indices) - 1
+
+        for i in range(asn_i):
+            index = self.visit(indices[i])
+            validation.validate_array_index(token, index, arr)
+
+            arr = arr[index]
+
+        index = self.visit(indices[asn_i])
+        validation.validate_array_index(token, index, arr)
+        arr[index] = self.visit(node.right)
+
+
+    def _array_initialization(self, node: AST) -> None:
+        """
+        Visits an array assignment
+        """
+
+        size = self.visit(node.size)
+        validation.validate_array_size(node.token, size)
+
+        return [None] * size
+
     def _unary_operator(self, node: AST) -> Any:
         """
         Visits a unary operator (can be +/-)

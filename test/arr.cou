@@ -1,0 +1,14 @@
+test: arr = arr[5];
+test[1] = 'hello';
+test[0] = 'world';
+
+say test[1] + ' ' + test[0];
+
+d1: arr = arr[10];
+d1[1] = arr[11];
+d1[1][5] = arr[2];
+d1[1][5][0] = arr[9];
+
+d1[1][5][0][8] = 'hello there';
+
+say d1[1][5][0][8];

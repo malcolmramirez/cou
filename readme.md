@@ -2,11 +2,18 @@
 
 Cou is a simple programming language
 
+## Instructions
+
+In project directory, run
+```
+./cou <program-file-name>
+```
+
 ## Grammar
 
-Cou currently has the following language constructs:
-this is outdated ill update it eventually
+Cou currently has the following language constructs
 
+(a bit outdated)
 ### number
 #### [0-9]+ | [0-9]* [\.] [0-9]+
 

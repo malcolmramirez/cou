@@ -1,0 +1,58 @@
+
+proc generate_square: nil(n: num) {
+    # Generates a magic square of size n
+
+    proc print_square: nil(square: arr) {
+        # Prints the square
+        say (n + ' by ' + n + ' square: ');
+        as (i: num = 0; i < n; i = i + 1) {
+            print_str: str = '';
+
+            as (j: num = 0; j < n; j = j + 1) {
+                print_str = print_str + square[i][j];
+
+                if (j != n - 1) {
+                    print_str = print_str + ',';
+
+                }
+            }
+
+            say print_str;
+        }
+    }
+
+    # Block to initialize square
+    square: arr = arr[n];
+
+    as (i: num = 0; i < n; i = i + 1) {
+        square[i] = arr[n];
+    }
+
+    row: num = 0;
+    col: num = (n - 1) %/ 2;
+
+    no_iter: num = n * n;
+
+    as (m_num: num =  1; m_num <= no_iter; m_num = m_num + 1) {
+        square[row][col] = m_num;
+
+        # Check the up-right cell, wrapping around if needed.
+        nrow: num = (row - 1) % n;
+        ncol: num = (col + 1) % n;
+
+        if (square[nrow][ncol] != nothing) {
+            # Move down if value found.
+            nrow = (row + 1) % n;
+            ncol = col;
+        }
+
+        row = nrow;
+        col = ncol;
+    }
+
+    print_square(square);
+}
+
+generate_square(3);
+generate_square(9);
+generate_square(10);

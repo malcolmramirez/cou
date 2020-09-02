@@ -10,6 +10,7 @@ _type_switch = {
     float      : tok.NUM,
     bool       : tok.BOOL,
     str        : tok.STR,
+    list       : tok.ARR,
     type(None) : tok.NIL
 }
 
@@ -18,8 +19,34 @@ _op_switch = {
                   tok.EQ, tok.NEQ, tok.GEQ, tok.LEQ, tok.GREATER, tok.LESS),
     tok.BOOL   : (tok.AND, tok.OR, tok.NOT, tok.EQ, tok.NEQ),
     tok.STR    : (tok.ADD, tok.EQ, tok.NEQ),
-    tok.NIL    : (tok.EQ, tok.NEQ)
+    tok.NIL    : (tok.EQ, tok.NEQ),
+    tok.ARR    : (tok.EQ, tok.NEQ)
 }
+
+
+def validate_array_index(token: Token, index: Any, arr: Any):
+    """
+    Validates an array index
+    """
+
+    arr_c_type = _type_switch[type(arr)]
+    if type(index) != int:
+        error(f"Array index must be an integer value", token)
+
+    elif type(arr) != list:
+        error(f"Type '{arr_c_type}' not indexed", token)
+
+    elif len(arr) <= index:
+        raise IndexError(f"Array index out of range <line:{token.line},col:{token.col}>")
+
+
+def validate_array_size(token: Token, asn: Any):
+    """
+    Validates an array assignment
+    """
+
+    if type(asn) != int:
+        error(f"Array size must be an integer value", token)
 
 
 def validate_condition(token: Token, asn: Any):
@@ -64,7 +91,7 @@ def validate_operation(op_type: str, token: Token, op1: Any, op2: Any = None):
         if (c_type_1 == tok.STR or c_type_2 == tok.STR) and op_type == tok.ADD:
             return # Here an automatic string conversion will happen, so this is ok
 
-        if c_type_1 != c_type_2:
+        if c_type_1 != c_type_2 or op_type not in _op_switch[c_type_1]:
             error(f"Invalid operation {op_type} between types '{c_type_1}' and '{c_type_2}'", token)
 
     else:

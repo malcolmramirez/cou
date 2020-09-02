@@ -47,11 +47,17 @@ class Parser:
         operand_token = self.curr
         node = None
 
-        if operand_token.type == tok.ID:
+        if operand_token.type == tok.ARR:
+            node = self._array_initialization()
+
+        elif operand_token.type == tok.ID:
             next_char = self._tokenizer.peek()
 
             if next_char == tok.L_PAREN:
                 node = self._process_call()
+
+            elif next_char == tok.L_BRACK:
+                node = self._array_element()
 
             else:
                 node = self._variable()
@@ -80,6 +86,9 @@ class Parser:
             self._consume(tok.L_PAREN)
             node = self._disjunction()
             self._consume(tok.R_PAREN)
+
+        else:
+            error(f"Invalid factor '{operand_token.value}'", operand_token)
 
         return node
 
@@ -149,10 +158,32 @@ class Parser:
 
         return String(token)
 
+    def _array_element(self) -> AST:
+        """
+        Parses an array element
+            array_element : id lbrack number rbrack
+        """
+
+        token = self.curr
+        arr_name = token.value
+
+        if arr_name not in self.symtab:
+            error(f"Array '{arr_name}' accessed before declaration", token)
+
+        self._consume(tok.ID)
+
+        indices = []
+        while self.curr.type == tok.L_BRACK:
+            self._consume(tok.L_BRACK)
+            indices.append(self._sum())
+            self._consume(tok.R_BRACK)
+
+        return ArrayElement(token, indices)
+
     def _variable(self) -> AST:
         """
         Parses a variable
-            variable : ID
+            variable : id
         """
 
         token = self.curr
@@ -169,12 +200,12 @@ class Parser:
     def _variable_type(self) -> AST:
         """
         Parses a type
-            type : num | bool | str
+            type : num | bool | str | nil | arr
         """
 
         token = self.curr
 
-        if token.type not in (tok.NUM, tok.BOOL, tok.STR, tok.NIL):
+        if token.type not in (tok.NUM, tok.BOOL, tok.STR, tok.NIL, tok.ARR):
             error(f"Invalid type definition: '{token.value}'", token)
 
         self._consume(token.type)
@@ -184,6 +215,7 @@ class Parser:
     def _variable_declaration(self) -> AST:
         """
         Parses a variable declaration
+            variable_declaration : variable colon variable_type
         """
 
         token = self.curr
@@ -202,11 +234,29 @@ class Parser:
 
         return VariableDeclaration(variable, var_type)
 
+    def _array_initialization(self) -> AST:
+        """
+        Parses an array initialization
+            array : arr lbrack sum rbrack
+        """
+
+        token = self.curr
+
+        self._consume(tok.ARR)
+
+        self._consume(tok.L_BRACK)
+        arr = ArrayInitialization(token, self._sum())
+        self._consume(tok.R_BRACK)
+
+        return arr
+
     def _assignment_statement(self) -> AST:
         """
         Parses an assignment statement
-            statement : variable assign expression
-                            | variable_declaration assign expression
+            statement : variable assign disjunction
+                            | variable_declaration assign disjunction
+                            | variable_declaration assign array
+                            | array_element_assignment
         """
 
         token = self.curr
@@ -214,14 +264,21 @@ class Parser:
 
         next_char = self._tokenizer.peek()
 
+        if next_char == tok.L_BRACK:
+            to_assign = self._array_element()
+            self._consume(tok.ASSIGN)
+            return ArrayElementAssignment(to_assign, token, self._disjunction())
+
         if next_char == tok.COLON:
             to_assign = self._variable_declaration()
 
         else:
             to_assign = self._variable()
 
-        var_type = self.symtab[var_name]
         self._consume(tok.ASSIGN)
+
+        if self.curr.type == tok.ARR:
+            return AssignmentStatement(to_assign, token, self._array_initialization())
 
         return AssignmentStatement(to_assign, token, self._disjunction())
 
@@ -244,6 +301,7 @@ class Parser:
         # Shifting the scope of the symbol table to the conditional level
         self.symtab = SymbolTable(scope_level, "if", self.symtab)
         conditions.append(Condition(condition, self._block()))
+        self.symtab = self.symtab.sc_enclosing
 
         while self.curr.type == tok.ELIF:
             self._consume(tok.ELIF)
@@ -254,6 +312,7 @@ class Parser:
 
             self.symtab = SymbolTable(scope_level, "elif", self.symtab)
             conditions.append(Condition(condition, self._block()))
+            self.symtab = self.symtab.sc_enclosing
 
         if self.curr.type == tok.ELSE:
             # Use this to always eval True for else during interpretation
@@ -265,6 +324,7 @@ class Parser:
 
             self.symtab = SymbolTable(scope_level, "else", self.symtab)
             conditions.append(Condition(else_cond, self._block()))
+            self.symtab = self.symtab.sc_enclosing
 
         return Conditions(conditions)
 
@@ -274,13 +334,9 @@ class Parser:
             as_declaration : lparen (assignment_statement sep)? disjunction sep (assignment_statement sep)?
         """
 
-        scope_level = self.symtab.sc_level + 1
-        self.symtab = SymbolTable(scope_level, "as", self.symtab)
-
         self._consume(tok.L_PAREN)
 
         token = self.curr
-
         next_char = self._tokenizer.peek()
         var_declr = None
 
@@ -310,7 +366,11 @@ class Parser:
         token = self.curr
         self._consume(tok.AS)
 
-        return As(token, self._as_declaration(), self._block())
+        self.symtab = SymbolTable(self.symtab.sc_level + 1, "as", self.symtab)
+        as_node = As(token, self._as_declaration(), self._block())
+        self.symtab = self.symtab.sc_enclosing
+
+        return as_node
 
     def _process_declaration(self) -> AST:
         """
@@ -360,6 +420,8 @@ class Parser:
         proc_name = proc_dec.value
 
         block = self._block()
+        self.symtab = self.symtab.sc_enclosing
+
         process = Process(proc_dec, block)
 
         # Store a pointer to this process node in the process symbol
@@ -445,8 +507,6 @@ class Parser:
         while self.curr.type != tok.R_BRACE:
             statements.append(self._statement())
 
-        self.symtab = self.symtab.sc_enclosing
-
         self._consume(tok.R_BRACE)
 
         return Block(statements)
@@ -475,8 +535,8 @@ class Parser:
             # Call for a process
             stmt = self._process_call()
 
-        elif token.type == tok.ID and next_char in (tok.COLON, tok.ASSIGN):
-            # Either declaring a variable or assigning.
+        elif token.type == tok.ID and next_char in (tok.COLON, tok.ASSIGN, tok.L_BRACK):
+            # Either declaring a variable, assigning, or accessing an array.
             stmt = self._assignment_statement()
 
         elif token.type == tok.SAY:

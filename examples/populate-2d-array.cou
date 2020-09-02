@@ -1,0 +1,11 @@
+rows: arr = arr[100];
+
+as (i: num = 0; i < 100; i = i + 1) {
+    rows[i] = arr[100];
+
+    as (j: num = 0; j < 100; j = j + 1) {
+        rows[i][j] = j;
+    }
+
+    say rows[i];
+}

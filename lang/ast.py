@@ -81,6 +81,55 @@ class Nothing(AST):
     __str__ = name
 
 
+class ArrayInitialization(AST):
+    """
+    Represents an array in the AST
+    """
+
+    def __init__(self, token: Token, size: AST):
+        self.token = token
+        self.size = size
+
+    def name(self) -> str:
+        return "array_initialization"
+
+    def __str__(self) -> str:
+        return f"arr {self.size}"
+
+
+class ArrayElement(AST):
+    """
+    Represents an array element in the AST
+    """
+
+    def __init__(self, token: Token, indices: List[AST]):
+        self.token = token
+        self.arr_name = token.value
+        self.indices = indices
+
+    def name(self) -> str:
+        return "array_element"
+
+    def __str__(self) -> str:
+        return f"{self.arr_name} {self.index}"
+
+class ArrayElementAssignment(AST):
+    """
+    Represents an array element assignment in the AST
+    """
+
+    def __init__(self, left: AST, token: Token, right: AST):
+        self.token = token
+        self.left = left
+        self.right = right
+
+    def name(self) -> str:
+        return "array_element_assignment"
+
+    def __str__(self) -> str:
+        return f"{self.arr_name} {self.left.index} = {self.right}"
+
+
 class UnaryOperator(AST):
     """
     Represents a unary operator (eg, unary +/-, floor)
