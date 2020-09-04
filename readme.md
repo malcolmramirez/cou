@@ -15,20 +15,20 @@ In project directory, run
 
 Cou supports the following types
 
-*num* : Represents a number, either an integer or float
+**num** : Represents a number, either an integer or float
 
-*bool* : Represents a boolean, denoted as either 'true' or 'false'
+**bool** : Represents a boolean, denoted as either 'true' or 'false'
 
-*str* : Represents a string. In cou, strings are delimited by single quotes, ie, ```'hello world'``` is acceptable, but ```"hello world"``` is not.
+**str** : Represents a string. In cou, strings are delimited by single quotes, ie, ```'hello world'``` is acceptable, but ```"hello world"``` is not.
 
-*nil* : A type to represent nothing, like ```null``` in Java or ```None``` in Python. The keyword used to represent a *nil* type object is ```nothing```
+**nil** : A type to represent nothing, like ```null``` in Java or ```None``` in Python. The keyword used to represent a **nil** type object is ```nothing```
 
-*arr* : Represents an array. In cou, arrays do not have an enforced typing. They are only initialized using a size parameter. For example, ```arr[5]``` will initialize an array with five elements. Each element will assume a ```nothing``` value by default.
+**arr** : Represents an array. In cou, arrays do not have an enforced typing. They are only initialized using a size parameter. For example, ```arr[5]``` will initialize an array with five elements. Each element will assume a ```nothing``` value by default.
 Array elements are accessed in typical fashion, ie, for an given an array named a with 3 elements, ```a[2]``` will access the third element in a.
 
 ### Variables
 
-Since cou is statically typed, each variable must have a specified type when it is declared. The syntax for a variable declaration is *identifer* : *type*.
+Since cou is statically typed, each variable must have a specified type when it is declared. The syntax for a variable declaration is ```identifer: type```.
 
 Cou does not support variable declaration without assignment, so when a variable is declared it must also be assigned a value. For example, ```s: str;``` is not a valid expression, and will cause a parser error.
 
@@ -54,9 +54,21 @@ five: arr = arr[5]; # Creates an array with five elements
 nada: nil = nothing; # Creates a 'nil' variable, assigning it 'nothing'
 ```
 
-### Processes
-TODO
 ### Operations
+
+Cou supports standard comparison ```==, !=, <=, <, >=, >```, logical ```&&, ||, !```, and arithmetic ```+, -, *, /, %``` operations. In cou, there is a distinction between floating point and integer division. The operator ```%/``` has been reserved for integer division. ```/``` is used for floating point division.
+
+Logical operators cannot be applied to arithmetic operators and vice versa. Moreover, all types are comparable to each other (using equality), but not to other types. The operators ```<=, <, >=, >``` are reserved for numeric use only.
+
+The only valid operation for strings aside from comparison is the concatenation operator ```+```. If any other type is concatenated to a string it will automatically be converted to a string value. For example,
+```
+valid_string: str = 'hello #' + 1 + '!';
+```
+
+will result in ```valid_string``` holding the value ```'hello #1!'```.
+
+### Processes
+
 TODO
 ### Logical Control Flow
 TODO
