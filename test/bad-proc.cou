@@ -5,4 +5,4 @@ proc test2: nil() {}
 # test(1, 2, 3);
 # test2(1, 2);
 
-#x: nil = test2; # Fix this shit
+# x: num = 1 + test2;

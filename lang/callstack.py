@@ -20,10 +20,12 @@ class Record(object):
         elif self.context:
             return self.context[var_name]
 
-        return None
+        # The only way we could get to this point is if a process is used,
+        # as all variables have already been validated by the parser.
+        raise SyntaxError(f"Cannot use process '{var_name}' as a variable")
 
     def __contains__(self, var_name: str) -> bool:
-        return self[var_name] != None
+        return var_name in self.memory or (self.context and var_name in self.context)
 
 class ActivationRecord(Record):
     """

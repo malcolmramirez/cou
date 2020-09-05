@@ -48,6 +48,33 @@ class Interpreter(Visitor):
         self.parser = Parser(Tokenizer(text))
         self.stack = CallStack()
 
+    def _cou_str(self, conv: Any) -> str:
+        """
+        Utility function to convert to string
+        """
+
+        s_conv = str(conv)
+
+        if isinstance(conv, list):
+            n = len(conv)
+            s_conv = '['
+
+            for i, elem in enumerate(conv):
+                s_conv += f"{self._cou_str(elem)}"
+                if i < n - 1:
+                    s_conv += ', '
+            s_conv += ']'
+
+        elif isinstance(conv, bool):
+            # Make it so that the string representation of booleans begin lower
+            s_conv = s_conv.lower()
+
+        elif isinstance(conv, type(None)):
+            # None -> nothing
+            s_conv = 'nothing'
+
+        return s_conv
+
     def _number(self, node: AST) -> int:
         """
         Visits a number node (just needs to return the value)
@@ -173,10 +200,10 @@ class Interpreter(Visitor):
         if op_type == tok.ADD:
 
             if type(l) == str:
-                r = str(r)
+                r = self._cou_str(r)
 
             elif type(r) == str:
-                l = str(l)
+                l = self._cou_str(l)
 
             return l + r
 
@@ -234,8 +261,8 @@ class Interpreter(Visitor):
         Interprets a variable declaration
         """
 
-        fr = self.stack.peek()
-        fr[node.value] = None
+        record = self.stack.peek()
+        record[node.value] = None
 
     def _say(self, node: AST) -> None:
         """
@@ -243,13 +270,7 @@ class Interpreter(Visitor):
         """
 
         visited = self.visit(node.value)
-        repr = str(visited)
-
-        if isinstance(visited, bool):
-            # Make it so that the string representation of booleans begin lower
-            repr = repr.lower()
-
-        print(repr)
+        print(self._cou_str(visited))
 
     def _assignment_statement(self, node: AST) -> None:
         """
