@@ -41,7 +41,9 @@ class Parser:
     def _factor(self) -> AST:
         """
         Parses a factor
-            factor : number | bool | string | (disjunction) | (add|sub) factor | variable
+            factor : number | bool | string | nothing | array_initialization
+                        | array_element | variable | process_call | (disjunction)
+                        | (add|sub) factor
         """
 
         operand_token = self.curr
@@ -110,10 +112,10 @@ class Parser:
     def _term(self) -> AST:
         """
         Parses a term
-            term : factor ((mul|div) factor)*
+            term : factor ((mul|div|idiv|mod) factor)*
         """
 
-        return self._parse_binop(self._factor, (tok.MUL, tok.DIV, tok.MOD, tok.I_DIV))
+        return self._parse_binop(self._factor, (tok.MUL, tok.DIV, tok.I_DIV, tok.MOD))
 
     def _sum(self) -> AST:
         """
@@ -134,7 +136,7 @@ class Parser:
     def _conjunction(self) -> AST:
         """
         Parses a conjunction
-            conjunction : comparison (or comparison)*
+            conjunction : comparison (and comparison)*
         """
 
         return self._parse_binop(self._comparison, tok.AND)
@@ -142,26 +144,15 @@ class Parser:
     def _disjunction(self) -> AST:
         """
         Parses a disjunction
-            conjunction : conjunction (and conjunction)*
+            conjunction : conjunction (or conjunction)*
         """
 
         return self._parse_binop(self._conjunction, tok.OR)
 
-    def _string(self) -> AST:
-        """
-        Parses a string
-            string : quote char* quote
-        """
-
-        token = self.curr
-        self._consume(tok.STRING)
-
-        return String(token)
-
     def _array_element(self) -> AST:
         """
         Parses an array element
-            array_element : id lbrack number rbrack
+            array_element : id (lbrack number rbrack)+
         """
 
         token = self.curr
@@ -190,7 +181,8 @@ class Parser:
         var_name = token.value
 
         if var_name not in self.symtab:
-            error(f"Variable '{var_name}' referenced before declaration", token)
+            error(
+                f"Variable '{var_name}' referenced before declaration", token)
 
         var_type = self.symtab[var_name].type_def
         self._consume(tok.ID)
@@ -255,8 +247,8 @@ class Parser:
         Parses an assignment statement
             statement : variable assign disjunction
                             | variable_declaration assign disjunction
-                            | variable_declaration assign array
-                            | array_element_assignment
+                            | variable_declaration assign array_initialization
+                            | array_element assign disjunction
         """
 
         token = self.curr
@@ -282,9 +274,10 @@ class Parser:
 
         return AssignmentStatement(to_assign, token, self._disjunction())
 
-    def _condition(self) -> AST:
+    def _conditions(self) -> AST:
         """
         Parses a conditional block
+            condition : if lparen disjunction rparen block (elif lparen disjunction rparen block)* (else block)?
         """
 
         token = self.curr
@@ -374,7 +367,8 @@ class Parser:
 
     def _process_declaration(self) -> AST:
         """
-        Parses a variable declaration
+        Parses a process declaration
+            process_declaration : id colon variable_type lparen (variable_declaration (variable_declaration comma)*)? rparen
         """
 
         token = self.curr
@@ -402,7 +396,8 @@ class Parser:
             self._consume(tok.COMMA)
             params.append(self._variable_declaration())
 
-        prev_tab[proc_name] = ProcessSymbol(proc_name, proc_type.value, self.symtab.sc_level, params)
+        prev_tab[proc_name] = ProcessSymbol(
+            proc_name, proc_type.value, self.symtab.sc_level, params)
 
         self._consume(tok.R_PAREN)
 
@@ -411,7 +406,7 @@ class Parser:
     def _process(self) -> AST:
         """
         Parses a process
-            process : proc id colon type lparen parameters rparen lbrace statements rbrace
+            process : proc process_declaration block
         """
 
         self._consume(tok.PROC)
@@ -461,13 +456,15 @@ class Parser:
         self._consume(tok.R_PAREN)
 
         if len(st_entry.params) != len(args):
-            error(f"Incorrect number of args ({len(args)}) for process '{proc_name}'", token)
+            error(
+                f"Incorrect number of args ({len(args)}) for process '{proc_name}'", token)
 
         return ProcessCall(token, args, st_entry)
 
     def _return(self) -> AST:
         """
         Parses a return statement
+            return : return [disjunction | empty] sep
         """
 
         self._consume(tok.RETURN)
@@ -480,7 +477,7 @@ class Parser:
     def _say(self) -> AST:
         """
         Parses a say function
-            say : say expression
+            say : say disjunction
         """
 
         self._consume(tok.SAY)
@@ -499,6 +496,7 @@ class Parser:
     def _block(self) -> AST:
         """
         Parses a block of code
+            block : lbrace statement* rbrace
         """
 
         self._consume(tok.L_BRACE)
@@ -514,9 +512,10 @@ class Parser:
     def _statement(self) -> AST:
         """
         Parses a statement
-            statement : [ empty | assignment_statement |
-                          say | disjunction | conditional
-                        ] sep
+            statement : process | conditions | as
+                            | [ process_call | assignment_statement | say
+                                    | return | empty | disjunction
+                              ] sep
         """
 
         token = self.curr
@@ -526,7 +525,7 @@ class Parser:
             return self._process()
 
         elif token.type == tok.IF:
-            return self._condition()
+            return self._conditions()
 
         elif token.type == tok.AS:
             return self._as()

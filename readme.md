@@ -24,7 +24,7 @@ Cou supports the following types
 **nil** : A type to represent nothing, like ```null``` in Java or ```None``` in Python. The keyword used to represent a **nil** type object is ```nothing```
 
 **arr** : Represents an array. In cou, arrays do not have an enforced typing. They are only initialized using a size parameter. For example, ```arr[5]``` will initialize an array with five elements. Each element will assume a ```nothing``` value by default.
-Array elements are accessed in typical fashion, ie, for an given an array named a with 3 elements, ```a[2]``` will access the third element in a.
+Array elements are accessed in typical fashion, ie, given an array named a with 3 elements, ```a[2]``` will access the third element in a.
 
 ### Variables
 
