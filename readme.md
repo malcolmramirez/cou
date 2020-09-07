@@ -104,7 +104,7 @@ proc cool_proc_1: nil() {
         return s2 + cool_proc_3();
     }
 
-    s1 = cool_proc_2() + s1; # will assign s1 'hello whattap ?'
+    s1 = cool_proc_2(); # will assign s1 'hello whattap ?'
 }
 ```
 
